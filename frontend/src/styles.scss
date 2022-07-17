@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: Eva-Icons;
+  src: url("~eva-icons/style/fonts/Eva-Icons.eot");
+  src: url("~eva-icons/style/fonts/Eva-Icons.eot?#iefix") format("embedded-opentype"), url("~eva-icons/style/fonts/Eva-Icons.woff2") format("woff2"),
+  url("~eva-icons/style/fonts/Eva-Icons.woff") format("woff"), url("~eva-icons/style/fonts/Eva-Icons.ttf") format("truetype"), url("~eva-icons/style/fonts/Eva-Icons.svg#Eva-Icons") format("svg");
+  font-style: normal;
+  font-weight: 400;
+}
+
+html, body { height: 100vh; width: 100vw; background-color: aliceblue;}
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.pace .pace-progress {
+  background: #c1b333;
+}
+
+.pace .pace-progress-inner {
+  box-shadow: 0 0 10px #c1b333, 0 0 5px #c1b333;
+}
+
+.pace .pace-activity {
+  display: none;
+}
+

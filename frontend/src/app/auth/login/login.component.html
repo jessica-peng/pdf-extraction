@@ -1,0 +1,36 @@
+<div class="login_card">
+  <mat-card>
+    <div class="auth_block">
+
+      <mat-card-title style="margin: 20px 0 50px 0; font-size: 50px;"> LOGIN </mat-card-title>
+      <mat-card-subtitle style="margin: 20px 0 50px 0; font-size: large;"> Login the system via email </mat-card-subtitle>
+
+      <form>
+        <mat-form-field appearance="standard">
+          <mat-label> Enter your email </mat-label>
+          <input matInput autofocus placeholder="pat@example.com" [formControl]="email" required>
+          <mat-error *ngIf="email.invalid">{{getEmailErrorMessage()}}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="standard">
+          <mat-label> Enter your password </mat-label>
+          <input matInput [type]="hide ? 'password' : 'text'" [formControl]="password" required>
+          <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+            <mat-icon style="width: 100%; font-size: large; color: gray;" [class]="hide ? 'eva  eva-eye-off-2-outline' : 'eva eva-eye-outline'"></mat-icon>
+          </button>
+          <mat-error *ngIf="password.invalid">{{getPasswordErrorMessage()}}</mat-error>
+        </mat-form-field>
+
+        <mat-card-actions align="end" style="margin: 20px auto;">
+          <button mat-stroked-button color="primary"
+                  [disabled]="email.invalid || password.invalid"
+                  (click)="goLogin()"> LOGIN </button>
+          <button mat-stroked-button color="accent" (click)="navigateRegister()"> Register </button>
+        </mat-card-actions>
+      </form>
+
+    </div>
+  </mat-card>
+
+</div>
+

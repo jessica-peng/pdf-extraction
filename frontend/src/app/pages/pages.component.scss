@@ -1,0 +1,251 @@
+$page_padding: 20px;
+$card_padding: 15px;
+
+button {
+  width: 100%;
+  height: 100%;
+  font-size: large;
+  text-transform: uppercase;
+}
+
+//mat-card {
+//  display: block;
+//  background-color: #fff;
+//  border: 0.0625rem solid #e4e9f2;
+//  border-radius: 0.25rem;
+//  box-shadow: 2px 2px 0 0 #0003;
+//  color: #222b45;
+//  font-size: .9375rem;
+//  font-weight: 400;
+//  line-height: 1.25rem;
+//  padding: $card_padding;
+//  height: calc(100% - 2 * #{$card_padding});
+//}
+
+mat-card-actions {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 20px;
+  transform: translateY(-10%);
+  padding: 0;
+}
+
+.select_card {
+  height: 10%;
+  padding: $page_padding;
+
+  ::ng-deep .mat-form-field-wrapper {
+    padding: 0;
+  }
+  mat-form-field {
+    width: 30%;
+  }
+
+  mat-card-actions {
+    width: 200px;
+    height: 80%;
+    margin-bottom: 0;
+  }
+}
+
+.schema_card {
+  height: 80%;
+  padding: $page_padding;
+
+  mat-expansion-panel-header {
+    font-size: large;
+  }
+  //mat-card-title {
+  //  height: calc(45px - 16px);
+  //  margin: 8px;
+  //  width: calc(100% - 16px);
+  //}
+
+  mat-tab-group {
+    height: 100%;
+    width: 100%;
+
+    ::ng-deep .mat-tab-header {
+      height: 50px;
+    }
+
+    ::ng-deep .mat-tab-body-wrapper {
+      height: calc(100% - 50px);
+    }
+
+    ::ng-deep .mat-tab-label {
+      font-size: medium;
+    }
+  }
+
+  //.mat-card-body {
+  //  width: 100%;
+  //  height: calc(100% - 45px);
+  //}
+
+  .setting {
+    height: calc(100% - 20px);
+    width: calc(50% - 20px);
+    margin: 10px;
+    float: left;
+
+    .add, .upload, .support, .analyze, .save {
+      height: calc(13% - 20px);
+      margin: 10px 0;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+
+      mat-form-field {
+        width: 70%;
+
+        ::ng-deep .mat-form-field-wrapper
+        {
+          margin: 0;
+          padding: 0;
+        }
+      }
+
+      mat-card-actions {
+        width: 20%;
+        height: 90%;
+      }
+    }
+
+    .ignore_token {
+      height: calc(46% - 20px);
+      margin: 10px 0;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+
+      mat-label {
+        line-height: 2rem;
+        font-size: large;
+        font-weight: 500;
+      }
+      .example-list-section {
+        line-height: 2rem;
+        margin: 10px;
+        font-size: large;
+      }
+
+      ul {
+        list-style-type: none;
+        margin-top: 4px;
+      }
+      .limit {
+        height: calc(30% - 20px);
+        margin: 10px 0;
+        padding: 0 30px;
+
+        mat-form-field {
+          width: 10%;
+
+          ::ng-deep .mat-form-field-wrapper
+          {
+            margin: 0;
+            padding: 0;
+          }
+
+          ::ng-deep .mat-form-field-infix {
+            padding: 5px;
+          }
+        }
+      }
+    }
+
+    .analyze{
+      transform: none;
+      text-align: right;
+    }
+  }
+
+  .choose_pattern {
+    height: calc(100% - 20px);
+    width: calc(50% - 20px);
+    margin: 10px;
+    float: left;
+    text-align: center;
+
+    .remove_patterns, .patterns, .selected_patterns {
+      width: 30% ;
+      height: 85%;
+      float: left;
+      margin-bottom: 15px;
+
+      .area {
+        height: calc(100% - 20px - 20px - 20px);
+        width: 100%;
+        border: 2px solid #5a656e;
+        border-radius: 2%;
+        overflow-y: auto;
+        margin: 10px 0;
+
+        mat-selection-list {
+          text-align: left;
+        }
+      }
+    }
+
+    .action {
+      width: 5%;
+      height: calc(80% - 200px);
+      float: left;
+      padding: 100px 0;
+      display: inline-grid;
+
+      button {
+        height: 50%;
+        border-radius: 0;
+
+      }
+    }
+
+    .save {
+      height: calc(13% - 20px);
+      margin: 10px 0;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+      transform: none;
+      text-align: right;
+
+      mat-form-field {
+        width: 70%;
+
+        ::ng-deep .mat-form-field-wrapper
+        {
+          margin: 0;
+          padding: 0;
+        }
+      }
+
+      mat-card-actions {
+        width: 20%;
+        height: 90%;
+      }
+    }
+  }
+}
+
+
+/* 網頁捲軸【寬度】 */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* 網頁捲軸【背景】顏色 */
+::-webkit-scrollbar-track {
+  background: #a9bed3;
+}
+
+/* 網頁捲軸【把手】顏色 */
+::-webkit-scrollbar-thumb {
+  background: #673ab7;
+}
+
+/* 網頁捲軸【滑過時】把手的顏色 */
+::-webkit-scrollbar-thumb:hover {
+  background: #fff;
+}
