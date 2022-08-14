@@ -17,7 +17,11 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatListModule} from "@angular/material/list";
 import {HttpClientModule} from "@angular/common/http";
+import {DialogSchemaComponent} from "./dialog/dialog-schema/dialog-schema.component";
+import {MatDialogModule} from "@angular/material/dialog";
+import { NgxJsonViewerModule } from "ngx-json-viewer";
 
+// @ts-ignore
 @NgModule({
   imports: [
     CommonModule,
@@ -26,6 +30,7 @@ import {HttpClientModule} from "@angular/common/http";
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    NgxJsonViewerModule,
     MatFormFieldModule,
     MatCardModule,
     MatSelectModule,
@@ -37,10 +42,13 @@ import {HttpClientModule} from "@angular/common/http";
     MatCheckboxModule,
     MatTooltipModule,
     MatIconModule,
-    MatListModule
+    MatListModule,
+    MatDialogModule,
+    MatSelectModule
   ],
   declarations: [
-    PagesComponent
+    PagesComponent,
+    DialogSchemaComponent
   ],
   schemas:[CUSTOM_ELEMENTS_SCHEMA]
 })
