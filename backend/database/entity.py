@@ -18,7 +18,7 @@ class Entity:
 
     def getSchemaInfoBySchemaId(self, schemaId):
         schema_collection = self.database.get_collection("schema")
-        schemaInfo = schema_collection.find_one({"schema_id": schemaId})
+        schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         return schemaInfo
 
     def updateUserInfoForSchema(self, userId, schemaId, schemaName):
@@ -40,7 +40,7 @@ class Entity:
         schemaInfo = schema_collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
         return schemaInfo
 
-    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd):
+    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd, pdfFile):
         schema_collection = self.database.get_collection("schema")
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         if ignoreTokes == "":
@@ -49,21 +49,45 @@ class Entity:
             minSupport = schemaInfo['minimum_support']
         if patternList == "":
             patternList = schemaInfo['pattern_list']
-        if attribute == '':
+        if attribute == "":
             attributes = schemaInfo['attributes']
         else:
             attributes = schemaInfo['attributes']
             attributes.append(attribute)
-        if dtd == '':
+        if dtd == "":
             dtd = schemaInfo['dtd']
+        if pdfFile == "":
+            file_list = schemaInfo['file_list']
+        else:
+            file_list = schemaInfo['file_list']
+            file_list.append(pdfFile)
 
         schema_collection.update_one({"schema_id": schemaId}, {"$set": {"ignore_token": ignoreTokes,
                                                                         "minimum_support": float(minSupport),
                                                                         "pattern_list": patternList,
                                                                         "attributes": attributes,
-                                                                        "dtd": dtd}})
+                                                                        "dtd": dtd,
+                                                                        "file_list": file_list}})
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         return schemaInfo
+
+    def insertFiles(self, files):
+        files_collection = self.database.get_collection("files")
+        _id = files_collection.insert_one(files).inserted_id
+        filesInfo = files_collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
+        return filesInfo
+
+    def getFileInfoBySchemaIdAndFileId(self, schemaId, fileId):
+        files_collection = self.database.get_collection("files")
+        filesInfo = files_collection.find_one({"schema_id": schemaId, "file_id": fileId}, {"_id": 0})
+        return filesInfo
+
+    def updateStructureById(self, schemaId, fileId, structure, pc):
+        files_collection = self.database.get_collection("files")
+        files_collection.update_one({"schema_id": schemaId, "file_id": fileId}, {"$set": {"structure": structure,
+                                                                                          "position": pc}})
+        filesInfo = files_collection.find_one({"schema_id": schemaId, "file_id": fileId}, {"_id": 0})
+        return filesInfo
 
     def test(self):
         db_list = self.client.list_database_names()
