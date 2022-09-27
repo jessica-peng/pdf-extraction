@@ -7,21 +7,24 @@ import {DialogSchemaComponent} from "./dialog/dialog-schema/dialog-schema.compon
 import {CommonService} from "../@core/service/common.service";
 import {SchemaService} from "../@core/service/schema.service";
 import {Schema} from "../@core/model/user.model";
-import {Level} from "../@core/model/schema.model";
+import {FileInfo, Level, SchemaStru} from "../@core/model/schema.model";
+import {AttrLevel, FileInfoStru} from "../@core/model/files.model";
+import {FilesService} from "../@core/service/files.service";
+import {closest, distance} from "fastest-levenshtein";
 
 @Component({
   selector: 'app-pages',
   templateUrl: './pages.component.html',
   styleUrls: ['./pages.component.scss'],
-  providers: [UserService, SchemaService, CommonService]
+  providers: [UserService, SchemaService, CommonService, FilesService]
 })
 export class PagesComponent implements OnInit{
-
-  constructor( private cd: ChangeDetectorRef,
-               private userService:UserService,
-               private schemaService: SchemaService,
-               private commonService: CommonService,
-               public dialog: MatDialog ) { }
+  constructor(private cd: ChangeDetectorRef,
+              private userService:UserService,
+              private schemaService: SchemaService,
+              private commonService: CommonService,
+              private filesService: FilesService,
+              public dialog: MatDialog ) { }
 
   tabIdx: number = 0;
   userId: string = '';
@@ -77,8 +80,24 @@ export class PagesComponent implements OnInit{
   selectLevel = this.levelList[0];
   selectPreAttr: string = '';
 
+  selectSchemaForMarked = null;
+  selectFileForMarked: FileInfo = null;
+  fileList: FileInfo[] = [];
+  selectedFileTest: File;
+  selectSchemaInfo: SchemaStru;
+  selectFileInfo: FileInfoStru;
+
+  selectAttrOfMain: AttrLevel = null;
+  selectAttrOfSub: string = "";
+  mainAttrList: AttrLevel[] = [];
+  subAttrList: string[] = [];
+  subAttrDisplay: boolean = true;
+  pdfStructure: object;
+  pdfPositionColor: object;
+  selectedText: object = {text: "", start: -1, end: -1};
+  pdfText: string = "";
+
   ngOnInit() {
-    console.log(this.schemaStructure);
     this.schemaOpenState = true;
     this.userService.getSchemaList(this.userId)
       .subscribe(data => {
@@ -99,9 +118,11 @@ export class PagesComponent implements OnInit{
 
   displaySchema() {
     let schema_name = this.schemaList.find(e => e.id === this.selectedSchema).name
-    this.schemaService.getSchema(this.selectedSchema)
+    this.schemaService.getDtd(this.selectedSchema)
       .subscribe( data => {
-        let schemaStructure = JSON.parse(data);
+        let schemaStructure = "";
+        if (data !== "")
+          schemaStructure = JSON.parse(data);
         this.cd.detectChanges();
         const dialogRef = this.dialog.open(DialogSchemaComponent, {
           width: '800px',
@@ -150,13 +171,14 @@ export class PagesComponent implements OnInit{
     this.tokens.find(e => e.name === token_name).checked = !this.tokens.find(e => e.name === token_name).checked;
   }
 
-  protected fileUpload(files_path: string, tokens: any[]) {
+  protected fileUpload(files_path: string, type: string, tokens: any[]) {
     console.log("Upload file for Schema to " + files_path);
-    this.commonService.uploadFiles(files_path, this.uploadFiles)
+    this.commonService.uploadFiles(files_path, type, this.uploadFiles)
       .subscribe( result => {
         console.log(result);
 
-        this.commonService.schemaMining(files_path, this.schemaId, this.min_support, this.pattern_min, this.pattern_max, tokens)
+        if (type === "pattern") {
+          this.commonService.schemaMining(files_path, this.schemaId, this.min_support, this.pattern_min, this.pattern_max, tokens)
           .subscribe( data => {
             this.patternList = data.pattern;
             this.patternLen = this.patternList.length;
@@ -165,7 +187,36 @@ export class PagesComponent implements OnInit{
             this.selectedLen = this.selectedList.length;
             console.log(data);
           });
+        } else if (type === "test") {
+          this.schemaService.updateFileListOfSchema(this.schemaId, this.uploadFiles[0].name)
+            .subscribe( data => {
+              this.fileList = data.file_list;
+              console.log(this.uploadFiles[0].name + " upload success!");
 
+              let fileId = this.fileList.find(file => file.name === this.uploadFiles[0].name).id;
+              this.selectFileForMarked = this.fileList.find(file => file.name === this.uploadFiles[0].name);
+              this.filesService.addFileInfo(data.schema_id, fileId, data.dtd)
+                .subscribe(result => {
+                  this.selectFileInfo = result;
+                  this.pdfStructure = result.structure;
+                  this.pdfPositionColor = result.position;
+                  this.cd.detectChanges();
+                  let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+                  for (let i = 0; i < json_viewer.length; i++) {
+                    json_viewer[i].style.position = 'initial';
+                  }
+                  this.getAttributeListWithLevel(result.structure);
+                  console.log(result);
+                });
+
+              let path = this.selectSchemaInfo.files_path + type;
+              this.commonService.readTextFileOfPDF(path, this.uploadFiles[0].name)
+                .subscribe(result => {
+                  this.pdfText = result;
+                  this.resetContent(this.pdfText);
+                });
+            });
+        }
       });
   }
 
@@ -178,7 +229,7 @@ export class PagesComponent implements OnInit{
       console.log("Exist Schema = " + this.schemaId);
       this.schemaService.updateSchema(this.schemaId, this.min_support, tokens)
       .subscribe(data => {
-        this.fileUpload(data.files_path, this.tokens);
+        this.fileUpload(data.files_path, "pattern", this.tokens);
         console.log(data);
       });
     } else {
@@ -194,12 +245,11 @@ export class PagesComponent implements OnInit{
       this.schemaService.addSchema(this.userId, schema, this.min_support, tokens)
       .subscribe(data => {
         this.schemaId = data.schema_id;
-        this.fileUpload(data.files_path, tokens);
+        this.fileUpload(data.files_path, "pattern", tokens);
         console.log(data);
       });
     }
-
-    console.log("Analyze by PrefixSpan. " );
+    console.log("Analyze by PrefixSpan." );
   }
 
   remove() {
@@ -326,6 +376,10 @@ export class PagesComponent implements OnInit{
         } else {
           this.schemaStructure = JSON.parse(data);
           this.cd.detectChanges();
+          let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+          for (let i = 0; i < json_viewer.length; i++) {
+            json_viewer[i].style.position = 'initial';
+          }
         }
       });
     console.log("get " + schema.name + "'s attribute list");
@@ -358,12 +412,12 @@ export class PagesComponent implements OnInit{
     if (selectDataType === 'String') {
       if (selectLevel.value === '2') {
         output[selectPreAttr] = output[selectPreAttr]===undefined ? {} : output[selectPreAttr];
-        output[selectPreAttr][selectAttr] = pattern.replace(',','/');
+        output[selectPreAttr][selectAttr] = pattern.replace(/,/g,'/');
       } else {
-        output[selectAttr] = pattern.replace(',','/');
+        output[selectAttr] = pattern.replace(/,/g,'/');
       }
     } else if (selectDataType === 'Array') {
-      pattern = pattern.replace(',','/');
+      pattern = pattern.replace(/,/g,'/');
       pList.push(pattern);
       if (selectLevel.value === '2') {
         output[selectPreAttr] = output[selectPreAttr]===undefined ? {} : output[selectPreAttr];
@@ -375,6 +429,10 @@ export class PagesComponent implements OnInit{
     this.selectedPattern = [];
     this.schemaStructure = JSON.parse(JSON.stringify(output));
     this.cd.detectChanges();
+    let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+    for (let i = 0; i < json_viewer.length; i++) {
+      json_viewer[i].style.position = 'initial';
+    }
   }
 
   saveSchema(schema: object) {
@@ -382,26 +440,460 @@ export class PagesComponent implements OnInit{
     this.schemaService.updateDtdOfSchema(this.schemaId, dtd)
       .subscribe(data =>  {
         console.log(data);
+        window.alert('Save success ');
       });
   }
 
-  // someComplete(): boolean {
-  //   if (this.tokens == null) {
-  //     return false;
-  //   }
-  //   return this.tokens.filter(t => t.completed).length > 0 && !this.allComplete;
-  // }
-  //
-  // setAll(selected: boolean) {
-  //   this.allComplete = selected;
-  //   if (this.tokens == null) {
-  //     return;
-  //   }
-  //   this.tokens.forEach(t => (t.completed = selected));
-  // }
+  changeSchema(selectSchema: Schema): void {
+    this.schemaService.getSchemaInfo(selectSchema.id)
+      .subscribe( data => {
+        this.schemaId = data.schema_id;
+        this.selectSchemaInfo = data;
+        this.fileList = data.file_list;
+        console.log(this.selectSchemaInfo);
+      });
+    console.log(selectSchema);
+  }
 
-  // updateAllComplete() {
-  //   this.allComplete = this.tokens != null && this.tokens.every(t => t.completed);
-  // }
+  uploadFileTest(event): void {
+    this.selectedFileTest = <File>event.target.files[0];
+    let fileName = this.selectedFileTest.name;
+    if (fileName.substring(fileName.lastIndexOf('.')) === '.pdf') {
+      this.uploadFiles[0] = <File> this.selectedFileTest;
+    } else {
+      window.alert('Wrong file: ' + fileName);
+    }
+
+    if (this.fileList !== []) {
+      if (this.fileList.find(s => s.name === fileName)) {
+        window.alert(fileName + " is exist! Please enter another pdf file.");
+        return;
+      }
+    }
+
+    this.fileUpload(this.selectSchemaInfo.files_path, "test", null);
+  }
+
+  changePDFFile(fileInfo: FileInfo): void {
+    let path = this.selectSchemaInfo.files_path + "test";
+    this.commonService.readTextFileOfPDF(path, fileInfo.name)
+      .subscribe(result => {
+        this.pdfText = result;
+        this.resetContent(this.pdfText);
+
+        this.filesService.getFileInfo(this.selectSchemaInfo.schema_id, fileInfo.id)
+          .subscribe(result => {
+            this.selectFileInfo = result;
+            this.pdfStructure = result.structure;
+            this.pdfPositionColor = result.position;
+            this.cd.detectChanges();
+            let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+            for (let i = 0; i < json_viewer.length; i++) {
+                json_viewer[i].style.position = 'initial';
+            }
+            this.getAttributeListWithLevel(result.structure);
+            this.markTextContent(this.pdfPositionColor);
+          });
+      });
+  }
+
+  getSelectText() {
+    const selected = window.getSelection();
+    let anchor_node = selected.anchorNode.parentNode;
+    let focus_node = selected.focusNode.parentNode;
+    let startLine = parseInt(anchor_node.parentElement.id.split("-")[1], 10);
+    let endLine = parseInt(focus_node.parentElement.id.split("-")[1], 10);
+    let start = anchor_node["dataset"].value;
+    let end = focus_node["dataset"].value;
+    if (parseInt(start, 10) < parseInt(end, 10)) {
+        end = (parseInt(end, 10) + 1).toString();
+    } else {
+        let temp = start;
+        start = end;
+        end = (parseInt(temp, 10) + 1).toString();
+    }
+
+    let lines = [];
+    if (startLine === endLine) {
+      let lineId = "line-" + startLine;
+      lines.push(lineId);
+    } else {
+      if (startLine > endLine) {
+        let temp = startLine;
+        startLine = endLine;
+        endLine = temp;
+      }
+
+      for (let i = startLine; i <= endLine; i++) {
+        let lineId = "line-" + i;
+        lines.push(lineId);
+      }
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      let p = document.getElementById(lines[i]);
+      let children = Array.prototype.slice.call(p.childNodes);
+      children.forEach(n => {
+        if (n.localName === "button")
+          p.removeChild(document.getElementById(n.id));
+      })
+    }
+
+    this.selectedText = {
+      text: selected.toString().replace(/\n/g, '')
+                               .replace(/　/g, '')
+                               .replace(/  /g, '')
+                               .replace(/ /g, ''),
+      lineId: lines,
+      start: start,
+      end: end
+    };
+
+    console.log(this.selectedText);
+  }
+
+  changeAttr(attr: AttrLevel) {
+    this.selectAttrOfSub = "";
+    this.subAttrList = attr.level2;
+    if (this.subAttrList !== undefined) {
+      if (this.subAttrList.length !== 0)
+        this.subAttrDisplay = false;
+    }
+    console.log(attr);
+  }
+
+  addToStructure(mainAttr: AttrLevel, subAttr: string): void {
+    if (this.selectedText["text"] === "")
+      return;
+
+    let pc = {
+      lineId: this.selectedText["lineId"],
+      start: this.selectedText["start"],
+      end: this.selectedText["end"],
+      color: mainAttr.color
+    };
+    if (subAttr === "") {
+      if (typeof this.pdfStructure[mainAttr.level1] === 'object') {
+        this.pdfStructure[mainAttr.level1].push(this.selectedText["text"]);
+        this.pdfPositionColor[mainAttr.level1].push(JSON.stringify(pc));
+      } else {
+        this.pdfStructure[mainAttr.level1] = this.selectedText["text"];
+        this.pdfPositionColor[mainAttr.level1] = JSON.stringify(pc);
+      }
+    } else {
+      if (typeof this.pdfStructure[mainAttr.level1][subAttr] === 'object') {
+        this.pdfStructure[mainAttr.level1][subAttr].push(this.selectedText["text"]);
+        this.pdfPositionColor[mainAttr.level1][subAttr].push(JSON.stringify(pc));
+      } else {
+        this.pdfStructure[mainAttr.level1][subAttr] = this.selectedText["text"];
+        this.pdfStructure[mainAttr.level1][subAttr] = JSON.stringify(pc);
+      }
+    }
+    this.pdfStructure = JSON.parse(JSON.stringify(this.pdfStructure));
+    this.pdfPositionColor = JSON.parse(JSON.stringify(this.pdfPositionColor));
+    this.resetContent(this.pdfText);
+    this.markTextContent(this.pdfPositionColor);
+    this.cd.detectChanges();
+    let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+    for (let i = 0; i < json_viewer.length; i++) {
+        json_viewer[i].style.position = 'initial';
+    }
+    this.selectedText = {text: "", start: -1, end: -1};
+  }
+
+  saveFileStructure(fileInfo: FileInfo): void {
+    this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor)
+      .subscribe(result => {
+        window.alert("Save completed");
+      });
+    console.log(fileInfo);
+  }
+
+  removeValue(eleInfo: any) {
+    let removeAttrAndPos = eleInfo.id;
+    let attr = removeAttrAndPos.split("#")[0];
+    let pos = removeAttrAndPos.split("#")[1];
+    if(attr.match(RegExp("-"))) {
+      let mainAttr = attr.split("-")[0];
+      let subAttr = attr.split("-")[1];
+      if (pos!=="99") {
+        this.pdfStructure[mainAttr][subAttr].splice(pos, 1);
+        this.pdfPositionColor[mainAttr][subAttr].splice(pos, 1);
+      } else {
+        this.pdfStructure[mainAttr][subAttr] = "";
+        this.pdfPositionColor[mainAttr][subAttr] = "";
+      }
+    } else {
+      if (pos!=="99") {
+        this.pdfStructure[attr].splice(pos, 1);
+        this.pdfPositionColor[attr].splice(pos, 1);
+      } else {
+        this.pdfStructure[attr] = "";
+        this.pdfPositionColor[attr] = "";
+      }
+    }
+    this.pdfStructure = JSON.parse(JSON.stringify(this.pdfStructure));
+    this.pdfPositionColor = JSON.parse(JSON.stringify(this.pdfPositionColor));
+    this.resetContent(this.pdfText);
+    this.markTextContent(this.pdfPositionColor);
+    this.cd.detectChanges();
+    let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+    for (let i = 0; i < json_viewer.length; i++) {
+        json_viewer[i].style.position = 'initial';
+    }
+    console.log(eleInfo);
+  }
+
+  protected getPatternAttr(dtd: string, lineText: string) {
+    let pattern = "";
+    let structure = JSON.parse(dtd);
+    let text = lineText.split('　')[0];
+    let key1 = Object.keys(structure);
+    for (let i = 0; i < key1.length; i++) {
+      if (typeof structure[key1[i]] === 'object'){
+        if (Array.isArray(structure[key1[i]])) {
+          if (structure[key1[i]].length !== 0) {
+            let attrArray = structure[key1[i]][0].split('/');
+            for (let a = 0; a < attrArray.length; a++) {
+              // let ratio = this.commonService.getSimilarity(attrArray[a], text);
+              let ratio = distance(attrArray[a], text);
+              if (ratio <= 0) {
+                if (pattern === "")
+                  pattern = key1[i];
+                else
+                  pattern = pattern + "/" + key1[i];
+                break;
+              }
+            }
+          }
+        } else {
+          let key2 = Object.keys(structure[key1[i]]);
+          for (let j = 0; j < key2.length; j++) {
+            if (Array.isArray(structure[key1[i]][key2[j]])) {
+              if (structure[key1[i]][key2[j]].length !== 0) {
+                let attrArray = structure[key1[i]][key2[j]][0].split('/');
+                for (let a = 0; a < attrArray.length; a++) {
+                  // let ratio = this.commonService.getSimilarity(attrArray[a], text);
+                  let ratio = distance(attrArray[a], text);
+                  if (ratio <= 0) {
+                    if (pattern === "")
+                      pattern = key1[i] + "." + key2[j];
+                    else
+                      pattern = pattern + "/" + key1[i] + "." + key2[j];
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        if (structure[key1[i]] === "")
+          continue;
+        let attrArray = structure[key1[i]].split('/');
+        for (let a = 0; a < attrArray.length; a++) {
+          // let ratio = this.commonService.getSimilarity(attrArray[a], text);
+          let ratio = distance(attrArray[a], text);
+          if (ratio <= 0) {
+            if (pattern === "")
+              pattern = key1[i];
+            else
+              pattern = pattern + "/" + key1[i];
+            break;
+          }
+        }
+      }
+    }
+
+    return pattern;
+  }
+
+  protected resetContent(text: string) {
+    text = text.replace(/ /g, '&nbsp')
+               .replace(/</g, '&lt')
+               .replace(/>/g, '&gt')
+               .replace(/\\n/g, '<br/>')
+               .replace(/\n/g, '<br/>')
+    let content = text.split("<br/>");
+
+    let textContent = document.getElementById("textContent");
+    if (textContent.children.length > 0) {
+      textContent.removeChild(document.getElementById("pdf"));
+    }
+
+    let pdfContent = document.createElement('div');
+    pdfContent.id = "pdf";
+    let dataIdx = 0;
+    for (let i = 0; i < content.length; i++) {
+      let pattern = "";
+      if (content[i].length > 1) {
+        pattern = this.getPatternAttr(this.selectSchemaInfo.dtd, content[i]);
+      }
+
+      let lineContent = document.createElement('p');
+      lineContent.id = "line-" + i;
+      if (pattern !== "")
+        lineContent.setAttribute('pattern', pattern);
+      for (let j = 0; j < content[i].length; j++)
+      {
+        let spam = document.createElement('spam');
+        spam.innerHTML = content[i].charAt(j);
+        spam.dataset["value"] = String(dataIdx);
+        spam.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        dataIdx = dataIdx + 1;
+        lineContent.appendChild(spam);
+      }
+      pdfContent.appendChild(lineContent);
+    }
+    textContent.appendChild(pdfContent);
+    this.cd.detectChanges();
+  }
+
+  protected getAttributeListWithLevel(structure: any) {
+    this.mainAttrList = [];
+    let attr = [];
+    let option = {};
+    let key1 = Object.keys(structure);
+    for (let i = 0; i < key1.length; i++) {
+      if (typeof structure[key1[i]] === 'object'){
+        option = {
+          "level1" : key1[i],
+          "level2" : Object.keys(structure[key1[i]]),
+          "color" : this.rgb_generator()
+        };
+      } else {
+        option = {
+          "level1" : key1[i],
+          "color" : this.rgb_generator()
+        };
+      }
+      attr.push(option);
+    }
+    this.mainAttrList = attr;
+    console.log(this.mainAttrList);
+  }
+
+  protected rgb_generator() {
+    let r = Math.floor(Math.random() * 256);
+    let g = Math.floor(Math.random() * 256);
+    let b = Math.floor(Math.random() * 256);
+    return { r, g, b }
+  }
+
+  protected setRemoveBtn(attr: string, index: number) {
+    let btn = document.createElement("button");
+    btn.setAttribute('class', 'remove-btn mat-focus-indicator mat-icon-button mat-button-base');
+    btn.setAttribute('mat-icon-button', '');
+    btn.setAttribute('aria-label', 'Remove');
+    btn.setAttribute('id', attr + '#' + index);
+    btn.onclick = (e) => {
+      this.removeValue(btn); // keyword 'this' is the instance in this scope
+    }
+
+    let icon = document.createElement("mat-icon");
+    icon.innerHTML = "cancel";
+    icon.setAttribute('role', 'img');
+    icon.setAttribute('class', 'remove-icon mat-icon notranslate material-icons material-symbols-outlined');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.setAttribute('data-mat-icon-type', 'font');
+    btn.appendChild(icon);
+    return btn;
+  }
+
+  protected markTextContent(pdfPC: any) {
+    let key1 = Object.keys(pdfPC);
+    for (let i = 0; i < key1.length; i++) {
+      if (typeof pdfPC[key1[i]] === 'object'){
+        if (Array.isArray(pdfPC[key1[i]])) {
+          if (pdfPC[key1[i]].length !== 0) {
+            for (let a = 0; a < pdfPC[key1[i]].length; a++) {
+              let pc = JSON.parse(pdfPC[key1[i]][a]);
+              let line = pc.lineId;
+              let start = pc.start;
+              let end = pc.end;
+              let color = pc.color;
+              let btn = this.setRemoveBtn(key1[i], a);
+              let idx = parseInt(start);
+              for (const l of line) {
+                let p = document.getElementById(l);
+                let children = p.children;
+                for (let i = 0; i < p.childNodes.length; i++) {
+                  let dataset = p.childNodes[i]["dataset"].value;
+                  if (parseInt(dataset) >= end) break;
+                  if (parseInt(dataset) === idx) {
+                    children[i]["style"].backgroundColor = 'rgba(' + color["r"] + ',' + color["g"] + ',' +
+                          color["b"] + ',' + 0.3 + ')';
+                    idx = idx + 1;
+                  }
+                  if (parseInt(dataset) === parseInt(start))
+                    p.insertBefore(btn,children[i]);
+                }
+              }
+            }
+          }
+        } else {
+          let key2 = Object.keys(pdfPC[key1[i]]);
+          for (let j = 0; j < key2.length; j++) {
+            if (Array.isArray(pdfPC[key1[i]][key2[j]])) {
+              if (pdfPC[key1[i]][key2[j]].length !== 0) {
+                for (let a = 0; a < pdfPC[key1[i]][key2[j]].length; a++) {
+                  let pc = JSON.parse(pdfPC[key1[i]][key2[j]][a]);
+                  let line = pc.lineId;
+                  let start = pc.start;
+                  let end = pc.end;
+                  let color = pc.color;
+                  let id = key1[i] + "-" + key2[j];
+                  let btn = this.setRemoveBtn(id, a);
+                  let idx = parseInt(start);
+                  for (const l of line) {
+                    let p = document.getElementById(l);
+                    let children = p.children;
+                    for (let i = 0; i < p.childNodes.length; i++) {
+                      let dataset = p.childNodes[i]["dataset"].value;
+                      if (parseInt(dataset) >= end) break;
+                      if (parseInt(dataset) === idx) {
+                        children[i]["style"].backgroundColor = 'rgba(' + color["r"] + ',' + color["g"] + ',' +
+                              color["b"] + ',' + 0.3 + ')';
+                        idx = idx + 1;
+                      }
+                      if (parseInt(dataset) === parseInt(start))
+                        p.insertBefore(btn,children[i]);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        if (pdfPC[key1[i]] === "")
+          continue;
+        let pc = JSON.parse(pdfPC[key1[i]]);
+        let line = pc.lineId;
+        let start = pc.start;
+        let end = pc.end;
+        let color = pc.color;
+        let btn = this.setRemoveBtn(key1[i], 99);
+        let idx = parseInt(start);
+
+        for (const l of line) {
+          let p = document.getElementById(l);
+          let children = p.children;
+          for (let i = 0; i < p.childNodes.length; i++) {
+            let dataset = p.childNodes[i]["dataset"].value;
+            if (parseInt(dataset) >= end) break;
+            if (parseInt(dataset) === idx) {
+              children[i]["style"].backgroundColor = 'rgba(' + color["r"] + ',' + color["g"] + ',' +
+                    color["b"] + ',' + 0.3 + ')';
+              idx = idx + 1;
+            }
+            if (parseInt(dataset) === parseInt(start))
+              p.insertBefore(btn,children[i]);
+          }
+        }
+      }
+    }
+    this.cd.detectChanges();
+  }
 }
 

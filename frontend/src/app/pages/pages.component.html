@@ -21,7 +21,7 @@
 
 <div class="schema_card">
   <mat-accordion multi>
-    <mat-expansion-panel (opened)="schemaOpenState = true" (closed)="schemaOpenState = false" expanded>
+    <mat-expansion-panel (opened)="schemaOpenState = true" (closed)="schemaOpenState = false" >
       <mat-expansion-panel-header>
         <mat-panel-title> Schema Mining </mat-panel-title>
       </mat-expansion-panel-header>
@@ -99,15 +99,15 @@
                                  color="primary"
                                  checkboxPosition="before"> {{token.name}} </mat-list-option>
               </mat-selection-list>
-                  <div class="limit">
-                    <mat-form-field appearance="outline" >
-                      <input matInput type="number" min="1" step="1" [defaultValue]="2" [(ngModel)]="pattern_min">
-                    </mat-form-field>
-                    <span> ~ </span>
-                    <mat-form-field appearance="outline" >
-                      <input matInput type="number" min="2" step="1" [defaultValue]="5" [(ngModel)]="pattern_max">
-                    </mat-form-field>
-                  </div>
+                <div class="limit">
+                  <mat-form-field appearance="outline" >
+                    <input matInput type="number" min="1" step="1" [defaultValue]="2" [(ngModel)]="pattern_min">
+                  </mat-form-field>
+                  <span> ~ </span>
+                  <mat-form-field appearance="outline" >
+                    <input matInput type="number" min="2" step="1" [defaultValue]="5" [(ngModel)]="pattern_max">
+                  </mat-form-field>
+                </div>
             </div>
 
             <div class="analyze">
@@ -204,38 +204,41 @@
 
         <mat-tab label="Create Schema">
           <div class="schema-setting">
-            <mat-form-field appearance="outline" class="select-schema">
-              <mat-label>Choose a schema</mat-label>
-              <mat-select [(ngModel)]="selectOne" name="schema">
-                <mat-option *ngFor="let schema of schemaList" [value]="schema">
-                  {{schema.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+            <div class="choose">
+              <mat-form-field appearance="outline" class="select-schema">
+                <mat-label>Choose a schema</mat-label>
+                <mat-select [(ngModel)]="selectOne" name="schema">
+                  <mat-option *ngFor="let schema of schemaList" [value]="schema">
+                    {{schema.name}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
 
-            <mat-card-actions class="show-pattern">
-              <button mat-raised-button color="primary"
-                      [disabled]="selectOne == null"
-                      (click)="getPatterns(selectOne)"> show pattern </button>
-            </mat-card-actions>
+              <mat-card-actions class="show-pattern">
+                <button mat-raised-button color="primary"
+                        [disabled]="selectOne == null"
+                        (click)="getPatterns(selectOne)"> show pattern </button>
+              </mat-card-actions>
+            </div>
+            <div class="choose">
+              <mat-form-field class="example-form-field" appearance="outline" class="select-schema">
+                <mat-label> Enter a attribute </mat-label>
+                <input matInput type="text" [(ngModel)]="attribute">
+                <button *ngIf="attribute" matSuffix mat-icon-button aria-label="Clear" (click)="attribute=''">
+                  <mat-icon> cancel </mat-icon>
+                </button>
+              </mat-form-field>
 
-            <mat-form-field class="example-form-field" appearance="outline" class="select-schema">
-              <mat-label> Enter a attribute </mat-label>
-              <input matInput type="text" [(ngModel)]="attribute">
-              <button *ngIf="attribute" matSuffix mat-icon-button aria-label="Clear" (click)="attribute=''">
-                <mat-icon> cancel </mat-icon>
-              </button>
-            </mat-form-field>
-
-            <mat-card-actions class="show-pattern">
-              <button mat-raised-button color="accent"
-                      [disabled]="attribute === ''"
-                      (click)="addAttribute(attribute)"> Add </button>
-            </mat-card-actions>
+              <mat-card-actions class="show-pattern">
+                <button mat-raised-button color="accent"
+                        [disabled]="attribute === ''"
+                        (click)="addAttribute(attribute)"> Add </button>
+              </mat-card-actions>
+            </div>
           </div>
 
           <div class="create-schema">
-            <div style="height: 520px; width: 30%; float: left">
+            <div style="height: 100%; width: 33%; float: left">
               <mat-label> Pattern List </mat-label>
                 <div class="pattern-area">
                   <mat-selection-list #choosePattern
@@ -248,7 +251,7 @@
                 </div>
             </div>
 
-            <div style="height: 520px; width: 40%; float: left">
+            <div style="height: 100%; width: 37%; float: left">
               <mat-label> Schema Structure </mat-label>
               <div class="schema-area">
                 <ngx-json-viewer [json]="schemaStructure"></ngx-json-viewer>
@@ -316,205 +319,98 @@
     </mat-expansion-panel>
 
 
-    <mat-expansion-panel (opened)="markedOpenState = true" (closed)="markedOpenState = false">
+    <mat-expansion-panel (opened)="markedOpenState = true" (closed)="markedOpenState = false" expanded>
       <mat-expansion-panel-header>
         <mat-panel-title> Text Marked </mat-panel-title>
       </mat-expansion-panel-header>
+      <div style="height: 100%; width: 100%; overflow-y: auto">
+        <div class="marked-setting">
+          <div class="choose-schema">
+            <mat-form-field appearance="outline" class="select-schema">
+              <mat-label>Choose a schema</mat-label>
+              <mat-select [(ngModel)]="selectSchemaForMarked" name="schema" (selectionChange)="changeSchema(selectSchemaForMarked)">
+                <mat-option *ngFor="let schema of schemaList" [value]="schema">
+                  {{schema.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="upload">
+            <mat-form-field appearance="outline" >
+              <mat-label>Choose a file</mat-label>
+              <mat-select [(ngModel)]="selectFileForMarked" name="schema" (selectionChange)="changePDFFile(selectFileForMarked)">
+                <mat-option *ngFor="let pdfFile of fileList" [value]="pdfFile">
+                  {{pdfFile.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-card-actions>
+              <button mat-stroked-button color="primary"
+                      [disabled]="selectSchemaForMarked === null"
+                      (click)="fileTest.click()"> Upload
+                <input #fileTest type="file"
+                       accept=".pdf"
+                       (change)="uploadFileTest($event)"
+                       style="display:none;" />
+              </button>
+            </mat-card-actions>
+          </div>
+          <div style="height: 80%; width: 95%">
+            <mat-label class="pdf-content"> PDF content </mat-label>
+            <div class="content-area">
+              <div id="textContent"
+                   style="font-size: 20px;"
+                   (mouseup)="getSelectText()">
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <div class="marked-structure">
+          <div class="attributes-area">
+            <mat-form-field appearance="outline" class="select-attributes">
+              <mat-label>Choose Level1 attribute</mat-label>
+              <mat-select [(ngModel)]="selectAttrOfMain"
+                          (selectionChange)="changeAttr(selectAttrOfMain)">
+                <mat-option *ngFor="let attr of mainAttrList" [value]="attr">
+                  {{attr.level1}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="select-attributes">
+              <mat-label>Choose Level2 attribute</mat-label>
+              <mat-select [(ngModel)]="selectAttrOfSub"
+                          [disabled]="subAttrDisplay">
+                <mat-option *ngFor="let attr of subAttrList" [value]="attr">
+                  {{attr}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="structure-action">
+            <mat-card-actions class="structure-button">
+              <button mat-raised-button color="accent"
+                      [disabled]="selectAttrOfMain === null"
+                      (click)="addToStructure(selectAttrOfMain, selectAttrOfSub)"> Add to structure</button>
+            </mat-card-actions>
+
+            <mat-card-actions class="structure-button">
+              <button mat-raised-button color="warn"
+                      [disabled]="pdfStructure === undefined"
+                      (click)="saveFileStructure(selectFileForMarked)"> Save </button>
+            </mat-card-actions>
+          </div>
+
+          <div style="height: 80%; width: 100%; float: left; text-align: left">
+            <mat-label class="structure-content"> File Structure </mat-label>
+            <div class="structure-area">
+              <ngx-json-viewer [json]="pdfStructure"></ngx-json-viewer>
+            </div>
+          </div>
+        </div>
+      </div>
     </mat-expansion-panel>
   </mat-accordion>
 </div>
-
-
-
-<!--<div class="schema_card">-->
-<!--  <mat-card>-->
-<!--    <mat-card-title> Schema Mining </mat-card-title>-->
-<!--    <div class="mat-card-body">-->
-<!--      <mat-tab-group mat-stretch-tabs mat-align-tabs="center" animationDuration="0ms">-->
-<!--        <mat-tab label="Choose Pattern">-->
-<!--          <div class="setting">-->
-<!--            <div class="add">-->
-<!--              <mat-form-field appearance="outline" >-->
-<!--                <mat-label>Category</mat-label>-->
-<!--                <input matInput-->
-<!--                       type="text"-->
-<!--                       placeholder="New / Re-analyze Category"-->
-<!--                       [formControl]="category"-->
-<!--                       [matAutocomplete]="auto"-->
-<!--                       required>-->
-<!--                <mat-autocomplete #auto="matAutocomplete">-->
-<!--                  <mat-option *ngFor="let category of filteredCategoryList | async" [value]="category">-->
-<!--                    {{category}}-->
-<!--                  </mat-option>-->
-<!--                </mat-autocomplete>-->
-<!--                <mat-error *ngIf="category.invalid"> You must enter a category</mat-error>-->
-<!--              </mat-form-field>-->
-<!--              <mat-card-actions>-->
-<!--                <button mat-stroked-button color="accent"-->
-<!--                        [disabled]="category.value == ''"-->
-<!--                        (click)="getPatterns(category.value)"> Show patterns </button>-->
-<!--              </mat-card-actions>-->
-<!--            </div>-->
-
-<!--            <div class="upload">-->
-<!--              <mat-form-field appearance="outline" >-->
-<!--                <mat-label>Upload File(s)</mat-label>-->
-<!--                <input matInput-->
-<!--                       type="text"-->
-<!--                       [formControl]="files"-->
-<!--                       required>-->
-<!--                <mat-error *ngIf="files.invalid"> You must upload the file(s)</mat-error>-->
-<!--              </mat-form-field>-->
-<!--              <mat-card-actions>-->
-<!--                <button mat-stroked-button color="primary"-->
-<!--                        [disabled]="category.value == ''"-->
-<!--                        (click)="fileInput.click()"> Select-->
-<!--                  <input #fileInput type="file" (change)="onFileInput($event)" style="display:none;" multiple />-->
-<!--                </button>-->
-<!--              </mat-card-actions>-->
-<!--            </div>-->
-
-<!--            <div class="support">-->
-<!--              <mat-form-field appearance="outline" >-->
-<!--                <mat-label>Minimum support</mat-label>-->
-<!--                <input matInput type="number" min="0.1" max="1.0" step="0.1" [defaultValue]="0.1" >-->
-<!--              </mat-form-field>-->
-<!--            </div>-->
-
-<!--            <div class="ignore_token">-->
-<!--              <mat-label> Ignore Token: </mat-label>-->
-<!--              <br>-->
-<!--              <span class="example-list-section">-->
-<!--                <mat-checkbox class="example-margin"-->
-<!--                              color="primary"-->
-<!--                              [checked]="allComplete"-->
-<!--                              [indeterminate]="someComplete()"-->
-<!--                              (change)="setAll($event.checked)">-->
-<!--                  All-->
-<!--                </mat-checkbox>-->
-<!--              </span>-->
-<!--              <span class="example-list-section">-->
-<!--                <ul>-->
-<!--                  <li *ngFor="let token of tokens">-->
-<!--                    <mat-checkbox color="accent"-->
-<!--                                  [(ngModel)]="token.completed"-->
-<!--                                  (ngModelChange)="updateAllComplete()">-->
-<!--                      {{token.name}}-->
-<!--                    </mat-checkbox>-->
-<!--                  </li>-->
-<!--                  <div class="limit">-->
-<!--                    <mat-form-field appearance="outline" >-->
-<!--                      <input matInput type="number" min="1" step="1" [defaultValue]="2" [(ngModel)]="pattern_min">-->
-<!--                    </mat-form-field>-->
-<!--                    <span> ~ </span>-->
-<!--                    <mat-form-field appearance="outline" >-->
-<!--                      <input matInput type="number" min="2" step="1" [defaultValue]="5" [(ngModel)]="pattern_max">-->
-<!--                    </mat-form-field>-->
-<!--                  </div>-->
-<!--                </ul>-->
-<!--              </span>-->
-<!--            </div>-->
-
-<!--            <div class="analyze">-->
-<!--              <mat-card-actions style="margin-right: 70px;">-->
-<!--                <button mat-raised-button color="warn"-->
-<!--                        [disabled]="category.value == '' || files.value == ''"-->
-<!--                        (click)="goAnalyze()"> analyze-->
-<!--                </button>-->
-<!--              </mat-card-actions>-->
-<!--            </div>-->
-
-<!--          </div>-->
-
-<!--          <div class="choose_pattern">-->
-
-<!--            <div class="remove_patterns">-->
-<!--              <mat-label> Removed </mat-label>-->
-<!--              <div class="area">-->
-<!--                <mat-selection-list #removed>-->
-<!--                  <mat-list-option *ngFor="let pattern of patternList">-->
-<!--                    {{pattern}}-->
-<!--                  </mat-list-option>-->
-<!--                </mat-selection-list>-->
-<!--              </div>-->
-<!--              <mat-label style="float: left;"> removed patterns: </mat-label>-->
-<!--            </div>-->
-
-<!--            <div class="action">-->
-<!--              <button mat-icon-button color="primary" matTooltip="Remove" matTooltipPosition="above">-->
-<!--                <mat-icon>-->
-<!--                  keyboard_double_arrow_left-->
-<!--                </mat-icon>-->
-<!--              </button>-->
-
-<!--              <button mat-icon-button color="primary" matTooltip="Restore" matTooltipPosition="above">-->
-<!--                <mat-icon>-->
-<!--                  keyboard_double_arrow_right-->
-<!--                </mat-icon>-->
-<!--              </button>-->
-<!--            </div>-->
-
-<!--            <div class="patterns">-->
-<!--              <mat-label> Patterns </mat-label>-->
-<!--              <div class="area">-->
-
-<!--                <mat-selection-list #patterns>-->
-<!--                <mat-list-option *ngFor="let pattern of patternList">-->
-<!--                  {{pattern}}-->
-<!--                </mat-list-option>-->
-<!--              </mat-selection-list>-->
-<!--              </div>-->
-<!--              <mat-label style="float: left;"> total patterns: </mat-label>-->
-<!--            </div>-->
-
-<!--            <div class="action">-->
-<!--              <button mat-icon-button color="primary" matTooltip="Select" matTooltipPosition="above">-->
-<!--                <mat-icon>-->
-<!--                  keyboard_double_arrow_right-->
-<!--                </mat-icon>-->
-<!--              </button>-->
-
-<!--              <button mat-icon-button color="primary" matTooltip="Restore" matTooltipPosition="above">-->
-<!--                <mat-icon>-->
-<!--                  keyboard_double_arrow_left-->
-<!--                </mat-icon>-->
-<!--              </button>-->
-<!--            </div>-->
-
-<!--            <div class="selected_patterns">-->
-<!--              <mat-label> Selected </mat-label>-->
-<!--              <div class="area">-->
-
-<!--                <mat-selection-list #selected>-->
-<!--                  <mat-list-option *ngFor="let pattern of patternList">-->
-<!--                    {{pattern}}-->
-<!--                  </mat-list-option>-->
-<!--                </mat-selection-list>-->
-<!--              </div>-->
-<!--              <mat-label style="float: left;"> selected patterns: </mat-label>-->
-<!--            </div>-->
-
-<!--            <div class="save">-->
-<!--              <mat-card-actions>-->
-<!--                <button mat-raised-button color="accent"-->
-<!--                        (click)="goSave()"> save-->
-<!--                </button>-->
-<!--              </mat-card-actions>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </mat-tab>-->
-<!--        <mat-tab label="Create Schema">Content 2</mat-tab>-->
-<!--      </mat-tab-group>-->
-<!--    </div>-->
-
-<!--  </mat-card>-->
-
-<!--</div>-->
-
-<!--<div class="mark_card">-->
-<!--  <mat-card>-->
-<!--    <mat-card-title> Text Marked </mat-card-title>-->
-<!--  </mat-card>-->
-
-<!--</div>-->

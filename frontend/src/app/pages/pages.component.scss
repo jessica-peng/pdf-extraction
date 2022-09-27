@@ -80,7 +80,7 @@ mat-card-actions {
     float: left;
 
     .add, .upload, .support, .analyze, .save {
-      height: calc(13% - 20px);
+      height: calc(10% - 20px);
       margin: 10px 0;
       display: inline-block;
       width: 100%;
@@ -103,7 +103,7 @@ mat-card-actions {
     }
 
     .ignore_token {
-      height: calc(46% - 20px);
+      height: calc(55% - 20px);
       margin: 10px 0;
       display: inline-block;
       width: 100%;
@@ -160,13 +160,13 @@ mat-card-actions {
 
     .remove_patterns, .patterns, .selected_patterns {
       width: 30% ;
-      height: 85%;
+      height: calc(85% - 30px);
       float: left;
       margin-bottom: 15px;
 
       .area {
-        height: 450px;
-        width: 100%;
+        height: calc(100% - 17px - 40px);
+        width: calc(100% - 4px);
         border: 2px solid #5a656e;
         border-radius: 2%;
         overflow-y: auto;
@@ -193,7 +193,7 @@ mat-card-actions {
     }
 
     .save {
-      height: calc(13% - 20px);
+      height: calc(10% - 20px);
       margin: 10px 0;
       display: inline-block;
       width: 100%;
@@ -224,13 +224,27 @@ mat-card-actions {
     margin: 10px;
     float: left;
 
-    .select-schema {
-      width: 58%;
-    }
+    .choose {
+      height: calc(10% - 20px);
+      margin: 10px 0;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
 
-    .show-pattern {
-      width: 180px;
-      height: 8%;
+      mat-form-field {
+        width: 70%;
+
+        ::ng-deep .mat-form-field-wrapper
+        {
+          margin: 0;
+          padding: 0;
+        }
+      }
+
+      mat-card-actions {
+        width: 23%;
+        height: 90%;
+      }
     }
   }
 
@@ -243,7 +257,7 @@ mat-card-actions {
 
 
     .pattern-area {
-      height: 500px;
+      height: calc(100% - 17px - 4px - 20px);
       width: calc(100% - 40px);
       border: 2px solid #5a656e;
       border-radius: 2%;
@@ -257,7 +271,7 @@ mat-card-actions {
     }
 
     .schema-area {
-      height: calc(500px - 20px);
+      height: calc(100% - 17px - 4px - 40px);
       width: calc(100% - 60px);
       border: 2px solid #5a656e;
       border-radius: 2%;
@@ -269,7 +283,7 @@ mat-card-actions {
     }
 
     .attributes-area {
-      height: 300px;
+      height: calc(80% - 60px);
       width: calc(30% - 40px);
       margin: 30px 20px;
       float: left;
@@ -280,20 +294,146 @@ mat-card-actions {
     }
 
     .schema-action {
-      height: 160px;
+      height: calc(20% - 20px);
       width: calc(30% - 40px);
       margin: 10px 20px;
       float: left;
 
       .schema-button {
         width: 100%;
-        height: 30%;
-        margin: 20px 0;
+        height: calc(50% - 10px);
+        margin: 5px 0;
+      }
+    }
+  }
+
+  .marked-setting {
+    height: calc(100% - 20px);
+    width: calc(50% - 20px);
+    margin: 10px;
+    float: left;
+
+    .choose-schema, .upload{
+      height: calc(10% - 20px);
+      margin: 10px 0;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+
+      mat-form-field {
+        width: 70%;
+
+        ::ng-deep .mat-form-field-wrapper {
+          margin: 0;
+          padding: 0;
+        }
+      }
+
+      mat-card-actions {
+        width: 20%;
+        height: 90%;
+      }
+    }
+
+    .pdf-content {
+      line-height: 2rem;
+      font-size: medium;
+      margin: 10px;
+    }
+    .content-area {
+      height: calc(100% - 2rem - 40px);
+      width: calc(100% - 40px);
+      border: 2px solid #5a656e;
+      border-radius: 2%;
+      overflow-y: auto;
+      margin: 10px;
+      float: left;
+      text-align: left;
+      padding: 10px;
+    }
+  }
+
+  .marked-structure {
+    height: calc(100% - 20px);
+    width: calc(50% - 20px);
+    margin: 10px;
+    float: left;
+    text-align: center;
+
+    .structure-content {
+      line-height: 2rem;
+      font-size: medium;
+      margin: 10px;
+    }
+
+    .structure-area {
+      height: calc(100% - 2rem - 40px);
+      width: calc(100% - 60px);
+      border: 2px solid #5a656e;
+      border-radius: 2%;
+      overflow-y: auto;
+      margin: 10px;
+      float: left;
+      text-align: left;
+      padding: 10px;
+    }
+
+    .attributes-area {
+      height: calc(20% - 20px);
+      width: calc(50% - 40px);
+      margin: 10px;
+      float: left;
+
+      .select-attributes {
+        width: 100%;
+      }
+    }
+
+    .structure-action {
+      height: calc(20% - 10px);
+      width: calc(50% - 40px);
+      margin: 5px 20px;
+      float: left;
+
+      .structure-button {
+        width: 100%;
+        height: calc(50% - 20px);
+        margin: 10px 0;
+      }
+    }
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    height: 780px;
+  }
+
+  ngx-json-viewer {
+    ::ng-deep .ngx-json-viewer {
+      overflow: auto !important;
+      display: inherit;
+
+      .toggler {
+        position: initial;
+        float: left;
       }
     }
   }
 }
 
+::ng-deep .remove-btn {
+  background-color: unset;
+  border: 0;
+  height: 25px;
+  width: 25px;
+  margin-right: 5px;
+}
+
+::ng-deep .remove-icon {
+  height: inherit;
+  width: inherit;
+  font-size: 20px;
+  color: darkgray;
+}
 
 /* 網頁捲軸【寬度】 */
 ::-webkit-scrollbar {

@@ -7,6 +7,7 @@ export class SchemaStru {
   pattern_list: string[];
   attributes: string[];
   dtd: string;
+  file_list: FileInfo[];
   files_path: string;
   update_time: Date;
 }
@@ -24,4 +25,9 @@ export class Attributes {
 export class Level {
   name: string;
   value: string;
+}
+
+export class FileInfo {
+  id: string;
+  name: string;
 }

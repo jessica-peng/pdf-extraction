@@ -11,10 +11,10 @@ export class SchemaService {
 
   constructor(private http: HttpClient) { }
 
-  getSchema(schemaId:string): Observable<string> {
+  getSchemaInfo(schemaId:string): Observable<SchemaStru> {
     const params = new HttpParams()
       .set('schemaId',schemaId);
-    return this.http.get<string>(this.baseApiUrl + 'schema',
+    return this.http.get<SchemaStru>(this.baseApiUrl + 'schema',
       {
         params: params
       });
@@ -87,5 +87,12 @@ export class SchemaService {
       .set('schemaId', schemaId)
       .set('dtd', dtd);
     return this.http.post<SchemaStru>(this.baseApiUrl + 'updateDtdOfSchema', params);
+  }
+
+  updateFileListOfSchema(schemaId:string, filename: string): Observable<SchemaStru>  {
+    const params = new HttpParams()
+      .set('schemaId', schemaId)
+      .set('filename', filename);
+    return this.http.post<SchemaStru>(this.baseApiUrl + 'updateFileListOfSchema', params);
   }
 }
