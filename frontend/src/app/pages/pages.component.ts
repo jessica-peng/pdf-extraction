@@ -605,9 +605,14 @@ export class PagesComponent implements OnInit{
 
   saveFileStructure(): void {
     let content: HTMLElement = document.getElementById("pdf");
-    this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor, content.outerHTML, this.selectSchemaInfo.mapping)
+    this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor)
       .subscribe(result => {
         window.alert("Save completed");
+      });
+
+    this.schemaService.learningRule(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping)
+      .subscribe( result => {
+        console.log(result);
       });
   }
 

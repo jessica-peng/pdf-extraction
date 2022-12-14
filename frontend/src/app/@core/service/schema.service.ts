@@ -3,6 +3,7 @@ import {GlobalVariable} from "../global";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {SchemaStru} from "../model/schema.model";
+import {FileInfoStru} from "../model/files.model";
 
 @Injectable()
 export class SchemaService {
@@ -94,5 +95,15 @@ export class SchemaService {
       .set('schemaId', schemaId)
       .set('filename', filename);
     return this.http.post<SchemaStru>(this.baseApiUrl + 'updateFileListOfSchema', params);
+  }
+
+  learningRule(schemaId:string, fileId:string, structure: any, content: string, mapping: any): Observable<SchemaStru> {
+    const params = new HttpParams()
+      .set('schemaId', schemaId)
+      .set('fileId', fileId)
+      .set('dtd', JSON.stringify(structure).toString())
+      .set('mapping', JSON.stringify(mapping).toString())
+      .set('content', content);
+    return this.http.post<SchemaStru>(this.baseApiUrl + 'learningRule', params);
   }
 }

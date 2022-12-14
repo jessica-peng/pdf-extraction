@@ -28,14 +28,12 @@ export class FilesService {
       });
   }
 
-  updateStructureById(schemaId:string, fileId:string, structure: any, pc: any, content: string, mapping: any): Observable<FileInfoStru> {
+  updateStructureById(schemaId:string, fileId:string, structure: any, pc: any): Observable<FileInfoStru> {
     const params = new HttpParams()
       .set('schemaId', schemaId)
       .set('fileId', fileId)
       .set('dtd', JSON.stringify(structure).toString())
-      .set('mapping', JSON.stringify(mapping).toString())
-      .set('pc', JSON.stringify(pc).toString())
-      .set('content', content);
+      .set('pc', JSON.stringify(pc).toString());
     return this.http.post<FileInfoStru>(this.baseApiUrl + 'updateStructureById', params);
   }
 }

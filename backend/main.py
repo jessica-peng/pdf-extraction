@@ -291,16 +291,10 @@ def update_structure_by_id():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
     dtd = request.form.get('dtd')
-    mapping = request.form.get('mapping')
     pc = request.form.get('pc')
-    content = request.form.get('content')
     structure = json.loads(dtd)
     positionColor = json.loads(pc)
-    mapping = json.loads(mapping)
     result = entity.updateStructureById(schemaId, fileId, structure, positionColor)
-    # Learning rule
-    mealyFst, mooreFst, rules = FST(schemaId, fileId, structure, content, mapping).learning()
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
     return jsonify(result)
 
 
@@ -309,12 +303,14 @@ def learning_rule():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
     dtd = request.form.get('dtd')
+    mapping = request.form.get('mapping')
     content = request.form.get('content')
     structure = json.loads(dtd)
-    fstType = "Moore"
-    fst = FST(schemaId, fileId, structure, content, fstType)
-    result = fst.learning()
-    return jsonify(result)
+    mapping = json.loads(mapping)
+    fst = FST(schemaId, fileId, structure, content, mapping)
+    mealyFst, mooreFst, rules = fst.learning()
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
+    return jsonify(schemaInfo)
 
 
 if __name__ == '__main__':
