@@ -7,6 +7,7 @@ export class SchemaStru {
   pattern_list: string[];
   attributes: string[];
   dtd: string;
+  mapping: any;
   file_list: FileInfo[];
   files_path: string;
   update_time: Date;

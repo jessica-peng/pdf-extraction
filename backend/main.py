@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 from backend.database.collection import Schema, Files
 from backend.database.entity import Entity
+from backend.module.fst import FST
 from backend.module.prefixSpan import PrefixSpan
 from backend.module.read_file import Read_File
 
@@ -15,10 +16,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 entity = Entity()
 
-
 # @app.route('/')
 # def root():
 #     return render_template('index.html')
+
 
 @app.route("/")
 def hello():
@@ -78,7 +79,7 @@ def update_schema():
     ignoreTokes = request.form.get('ignoreTokens')
     minSupport = request.form.get('minSupport')
 
-    schemaInfo = entity.updateSchema(schemaId, json.loads(ignoreTokes), minSupport, "", "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, json.loads(ignoreTokes), minSupport, "", "", "", "", "", "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -138,7 +139,7 @@ def update_pattern_of_schema():
     schemaId = request.form.get('schemaId')
     patternList = request.form.get('patternList')
     patternList = patternList.split(',')
-    schemaInfo = entity.updateSchema(schemaId, "", "", patternList, "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, "", "", patternList, "", "", "", "", "", "", "")
     print(schemaInfo)
 
     return jsonify(schemaInfo)
@@ -188,7 +189,7 @@ def get_dtd():
 def update_attribute_of_schema():
     schemaId = request.form.get('schemaId')
     attribute = request.form.get('attribute')
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", attribute, "", "")
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", attribute, "", "", "", "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -197,7 +198,22 @@ def update_attribute_of_schema():
 def update_dtd_of_schema():
     schemaId = request.form.get('schemaId')
     dtd = request.form.get('dtd')
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", dtd, "")
+    structure = json.loads(dtd)
+    mapping = {}
+
+    mainKey = structure.keys()
+    for key1 in mainKey:
+        if isinstance(structure[key1], dict):
+            subKey = structure[key1].keys()
+            for key2 in subKey:
+                if "_" in key2:
+                    K2 = key2.upper().split("_")[0][0] + key2.upper().split("_")[1][0]
+                else:
+                    K2 = key2
+                mapping.update({key1 + "." + key2: key1 + "_" + K2})
+        else:
+            mapping.update({key1: key1})
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", dtd, "", mapping, "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -212,7 +228,7 @@ def update_fileList_of_schema():
         "name": filename
     }
 
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", fileInfo)
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", fileInfo, "", "", "", "")
     path = schemaInfo['files_path'] + 'test'
     read_file = Read_File(path)
     read_file.read_pdf_file_text(filename)
@@ -275,10 +291,29 @@ def update_structure_by_id():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
     dtd = request.form.get('dtd')
+    mapping = request.form.get('mapping')
     pc = request.form.get('pc')
+    content = request.form.get('content')
     structure = json.loads(dtd)
     positionColor = json.loads(pc)
+    mapping = json.loads(mapping)
     result = entity.updateStructureById(schemaId, fileId, structure, positionColor)
+    # Learning rule
+    mealyFst, mooreFst, rules = FST(schemaId, fileId, structure, content, mapping).learning()
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
+    return jsonify(result)
+
+
+@app.route('/learningRule', methods=['POST'])
+def learning_rule():
+    schemaId = request.form.get('schemaId')
+    fileId = request.form.get('fileId')
+    dtd = request.form.get('dtd')
+    content = request.form.get('content')
+    structure = json.loads(dtd)
+    fstType = "Moore"
+    fst = FST(schemaId, fileId, structure, content, fstType)
+    result = fst.learning()
     return jsonify(result)
 
 

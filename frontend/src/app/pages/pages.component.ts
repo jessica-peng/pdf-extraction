@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnInit, SecurityContext} from "@angular/core";
 import {FormControl, Validators} from "@angular/forms";
 import {map, Observable, startWith} from "rxjs";
 import {UserService} from "../@core/service/user.service";
@@ -214,6 +214,8 @@ export class PagesComponent implements OnInit{
                 .subscribe(result => {
                   this.pdfText = result;
                   this.resetContent(this.pdfText);
+                  if (this.fileList.length !== 1)
+                    console.log("Go to extract file");
                 });
             });
         }
@@ -601,12 +603,12 @@ export class PagesComponent implements OnInit{
     this.selectedText = {text: "", start: -1, end: -1};
   }
 
-  saveFileStructure(fileInfo: FileInfo): void {
-    this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor)
+  saveFileStructure(): void {
+    let content: HTMLElement = document.getElementById("pdf");
+    this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor, content.outerHTML, this.selectSchemaInfo.mapping)
       .subscribe(result => {
         window.alert("Save completed");
       });
-    console.log(fileInfo);
   }
 
   removeValue(eleInfo: any) {
@@ -655,7 +657,6 @@ export class PagesComponent implements OnInit{
           if (structure[key1[i]].length !== 0) {
             let attrArray = structure[key1[i]][0].split('/');
             for (let a = 0; a < attrArray.length; a++) {
-              // let ratio = this.commonService.getSimilarity(attrArray[a], text);
               let ratio = distance(attrArray[a], text);
               if (ratio <= 0) {
                 if (pattern === "")
@@ -673,7 +674,6 @@ export class PagesComponent implements OnInit{
               if (structure[key1[i]][key2[j]].length !== 0) {
                 let attrArray = structure[key1[i]][key2[j]][0].split('/');
                 for (let a = 0; a < attrArray.length; a++) {
-                  // let ratio = this.commonService.getSimilarity(attrArray[a], text);
                   let ratio = distance(attrArray[a], text);
                   if (ratio <= 0) {
                     if (pattern === "")
@@ -692,7 +692,6 @@ export class PagesComponent implements OnInit{
           continue;
         let attrArray = structure[key1[i]].split('/');
         for (let a = 0; a < attrArray.length; a++) {
-          // let ratio = this.commonService.getSimilarity(attrArray[a], text);
           let ratio = distance(attrArray[a], text);
           if (ratio <= 0) {
             if (pattern === "")

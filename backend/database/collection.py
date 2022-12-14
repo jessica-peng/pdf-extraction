@@ -31,6 +31,10 @@ class Schema:
             "pattern_list": [],
             "attributes": [],
             "dtd": "",
+            "mapping": {},
+            "mealyFst": {},
+            "mooreFst": {},
+            "rules": {},
             "file_list": [],
             "files_path": "",
             "update_time": datetime.datetime.utcnow()

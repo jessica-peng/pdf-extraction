@@ -40,7 +40,7 @@ class Entity:
         schemaInfo = schema_collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
         return schemaInfo
 
-    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd, pdfFile):
+    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd, pdfFile, mapping, mealyFst, mooreFst, rules):
         schema_collection = self.database.get_collection("schema")
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         if ignoreTokes == "":
@@ -56,6 +56,14 @@ class Entity:
             attributes.append(attribute)
         if dtd == "":
             dtd = schemaInfo['dtd']
+        if mapping == "":
+            mapping = schemaInfo['mapping']
+        if mealyFst == "":
+            mealyFst = schemaInfo['mealy_fst']
+        if mooreFst == "":
+            mooreFst = schemaInfo['moore_fst']
+        if rules == "":
+            rules = schemaInfo['rules']
         if pdfFile == "":
             file_list = schemaInfo['file_list']
         else:
@@ -67,6 +75,10 @@ class Entity:
                                                                         "pattern_list": patternList,
                                                                         "attributes": attributes,
                                                                         "dtd": dtd,
+                                                                        "mapping": mapping,
+                                                                        "mealy_fst": mealyFst,
+                                                                        "moore_fst": mooreFst,
+                                                                        "rules": rules,
                                                                         "file_list": file_list}})
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         return schemaInfo
