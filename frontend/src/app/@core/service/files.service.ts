@@ -3,6 +3,7 @@ import {GlobalVariable} from "../global";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FileInfoStru} from "../model/files.model";
+import {SchemaStru} from "../model/schema.model";
 
 @Injectable()
 export class FilesService {
@@ -35,5 +36,15 @@ export class FilesService {
       .set('dtd', JSON.stringify(structure).toString())
       .set('pc', JSON.stringify(pc).toString());
     return this.http.post<FileInfoStru>(this.baseApiUrl + 'updateStructureById', params);
+  }
+
+  fileExtraction(schemaId:string, fileId:string, structure: any, content: string, mapping: any): Observable<FileInfoStru> {
+    const params = new HttpParams()
+      .set('schemaId', schemaId)
+      .set('fileId', fileId)
+      .set('dtd', JSON.stringify(structure).toString())
+      .set('mapping', JSON.stringify(mapping).toString())
+      .set('content', content);
+    return this.http.post<FileInfoStru>(this.baseApiUrl + 'fileExtraction', params);
   }
 }

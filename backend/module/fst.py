@@ -1,5 +1,7 @@
+import copy
 import difflib
 import json
+import re
 
 from SciPyFST import fst, fstUtils
 import graphviz
@@ -53,11 +55,21 @@ class FST:
             self.mealy_fst = init_fst()
         else:
             self.mealy_fst = self.schemaInfo['mealy_fst']
+            self.fstMealy = fst(initState=self.mealy_fst['initState'],
+                                states=self.mealy_fst['states'],
+                                transitionFunction=self.mealy_fst['transitionFunction'],
+                                outputFunction=self.mealy_fst['outputFunction'],
+                                finalStates=self.mealy_fst['finalStates'])
 
         if len(self.schemaInfo['moore_fst']) == 0:
             self.moore_fst = init_fst()
         else:
             self.moore_fst = self.schemaInfo['moore_fst']
+            self.fstMoore = fst(initState=self.moore_fst['initState'],
+                                states=self.moore_fst['states'],
+                                transitionFunction=self.moore_fst['transitionFunction'],
+                                outputFunction=self.moore_fst['outputFunction'],
+                                finalStates=self.moore_fst['finalStates'])
 
         if len(self.schemaInfo['rules']) == 0:
             self.rules = {}
@@ -335,6 +347,8 @@ class FST:
 
     def updateSchemaDtd(self, attr, leftStr):
         schema_dtd_json = json.loads(self.schemaInfo.get('dtd'))
+        schema_pattern_list = self.schemaInfo.get('pattern_list')
+        schema_pattern_list.append(leftStr)
         if '.' in attr:
             mainKey = attr.split('.')[0]
             subKey = attr.split('.')[1]
@@ -368,7 +382,7 @@ class FST:
 
         # dtd = stringify(schema_dtd_json)
         dtd = json.dumps(schema_dtd_json, ensure_ascii=False, default=str)
-        return entity.updateSchema(self.schemaInfo.get('schema_id'), "", "", "", "", dtd, "", "", "", "")
+        return entity.updateSchema(self.schemaInfo.get('schema_id'), "", "", schema_pattern_list, "", dtd, "", "", "", "", "")
 
     def resetSignal(self, inSignals, outSignals):
         original_inSignals = list()
@@ -398,14 +412,26 @@ class FST:
         soup = BeautifulSoup(self.source, "html.parser")
         line_info = self.getLineContentAttr(soup.findAll("p"))
         inSignals, outSignals = self.resetSignal(inSignals, outSignals)
+        value_idx = -1
+        out_temp = ''
         for idx, out in enumerate(outSignals):
+            if out_temp != out:
+                out_temp = out
+                value_idx = 0
+            else:
+                value_idx = value_idx + 1
             if out not in self.rules.keys():
-                self.rules[out] = []
+                self.rules[out] = {}
             inSignal = inSignals[idx]
+            preSignal = ""
+            if idx != 0:
+                preSignal = inSignals[idx - 1]
             nextSignal = ""
             if idx != len(outSignals) - 1:
                 nextSignal = inSignals[idx + 1]
             inSignal = self.getMappingKey(inSignal)
+            preSignal = self.getMappingKey(preSignal)
+            nextSignal = self.getMappingKey(nextSignal)
             in_value = self.new_dtd[inSignal]
             pos_file = self.fileInfo['position']
             if '.' in inSignal:
@@ -415,135 +441,106 @@ class FST:
             else:
                 pos = pos_file[inSignal]
 
-            lineIds = []
             if isinstance(pos, list):
-                for p in pos:
-                    position = json.loads(p)
-                    for lineId in position['lineId']:
-                        lineIds.append(lineId)
-            else:
-                position = json.loads(pos)
-                lineIds = position['lineId']
+                pos = pos[value_idx]
 
-            for line in lineIds:
-                line_id = int(line.split('-')[1])
-                lineInfo = line_info[line_id]
+            position = json.loads(pos)
+            lineIds = position['lineId']
 
-                pattern = ""
-                attr = lineInfo['attr']
-                if attr.get('pattern') is not None:
-                    pattern = attr.get('pattern')
+            line_id = int(lineIds[0].split('-')[1])
+            lineInfo = line_info[line_id]
 
-                content = lineInfo['line_content']
-                if isinstance(in_value, list):
-                    for value in in_value:
-                        startIdx = content.find(value)
-                        leftStr = content[0:startIdx-1]
-                        if (startIdx == -1) & (pattern == ""):
-                            if nextSignal == "":
-                                right_LM = "end"
-                            else:
-                                right_LM = "(\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341) or \n and [" + nextSignal + "] attribute value"
+            pattern = ""
+            attr = lineInfo['attr']
+            if attr.get('pattern') is not None:
+                pattern = attr.get('pattern')
 
-                            rule_structure = {
-                                'R': {
-                                    'line_id': lineIds,
-                                    'line_pattern': pattern,
-                                    'left_LM': "[" + inSignal + "] attribute value and \n or (\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341)",
-                                    'right_LM': right_LM
-                                },
-                                'count': 0
-                            }
-                        else:
-                            rule_structure = {
-                                'R': {
-                                    'line_id': lineIds,
-                                    'line_pattern': pattern,
-                                    'left_LM': "[" + inSignal + "] attribute value",
-                                    'right_LM': "\n"
-                                },
-                                'count': 0
-                            }
+            content = lineInfo['line_content']
+            if isinstance(in_value, list):
+                in_value = in_value[value_idx]
 
-                            if isinstance(self.schema_dtd[inSignal], list):
-                                if '/' in self.schema_dtd[inSignal][0]:
-                                    sp_list = self.schema_dtd[inSignal][0].split('/')
-                                else:
-                                    sp_list = self.schema_dtd[inSignal][0]
-                            else:
-                                if '/' in self.schema_dtd[inSignal]:
-                                    sp_list = self.schema_dtd[inSignal].split('/')
-                                else:
-                                    sp_list = self.schema_dtd[inSignal]
-
-                            if leftStr not in sp_list:
-                                self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
-                                print(self.schemaInfo)
-
-                        if len(self.rules[out]) == 0:
-                            self.rules[out].append(rule_structure)
-                        # else:
-                        #     rule_list = self.rules[out]
-                        #     add_new = False
-                        #     for rule in rule_list:
-                        #         rule_lineId = rule.get('R').get('line_id')
-                        #         rule_pattern = rule.get('R').get('line_pattern')
-                        #         rule_left_LM = rule.get('R').get('left_LM')
-                        #         rule_right_LM = rule.get('R').get('right_LM')
-                        #         if
-                        break
+            if pattern == "":
+                if isinstance(self.schema_dtd[inSignal], list):
+                    in_sp = self.schema_dtd[inSignal][0]
                 else:
-                    startIdx = content.find(in_value)
-                    if (startIdx == 0) & (content == in_value):
-                        rule_structure = {
-                            'R': {
-                                'line_id': lineIds,
-                                'line_pattern': pattern,
-                                'left_LM': "",
-                                'right_LM': "\n"
-                            },
-                            'count': 0
-                        }
-                    elif (startIdx == -1) & (pattern == ""):
-                        if nextSignal == "":
-                            right_LM = "end"
-                        else:
-                            right_LM = "\n and [" + nextSignal + "] attribute value"
-                        rule_structure = {
-                            'R': {
-                                'line_id': lineIds,
-                                'line_pattern': pattern,
-                                'left_LM': "[" + inSignal + "] attribute value and \n ",
-                                'right_LM': right_LM
-                            },
-                            'count': 0
-                        }
-                    elif (startIdx == -1) & (content.replace('\u3000', '') == in_value):
-                        rule_structure = {
-                            'R': {
-                                'line_id': lineIds,
-                                'line_pattern': pattern,
-                                'left_LM': "",
-                                'right_LM': "\n"
-                            },
-                            'count': 0
-                        }
-                    else:
-                        leftStr = content[0:startIdx - 1]
-                        if nextSignal == "":
-                            right_LM = "end"
-                        else:
-                            right_LM = "[" + nextSignal + "] attribute value"
-                        rule_structure = {
-                            'R': {
-                                'line_id': lineIds,
-                                'line_pattern': pattern,
-                                'left_LM': "[" + inSignal + "] attribute value and \n",
-                                'right_LM': right_LM
-                            },
-                            'count': 0
-                        }
+                    in_sp = self.schema_dtd[inSignal]
 
+                if content == in_value:
+                    if in_sp == "":
+                        left_LM = " "
+                        if nextSignal == "":
+                            right_LM = "\n||end"
+                        else:
+                            if isinstance(self.schema_dtd[nextSignal], list):
+                                out_sp = self.schema_dtd[nextSignal][0]
+                            else:
+                                out_sp = self.schema_dtd[nextSignal]
+                            if out_sp == "":
+                                right_LM = "\n"
+                            else:
+                                right_LM = "\n||[" + nextSignal + "] attribute value"
+                    else:
+                        if preSignal == "":
+                            left_LM = " "
+                        elif preSignal == inSignal:
+                            left_LM = " "
+                        else:
+                            left_LM = "[" + inSignal + "] attribute value||\n"
+
+                        if nextSignal == "":
+                            right_LM = "\n||end"
+                        elif nextSignal == inSignal:
+                            if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
+                                right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
+                            else:
+                                right_LM = "\n"
+                        else:
+                            if isinstance(self.schema_dtd[nextSignal], list):
+                                out_sp = self.schema_dtd[nextSignal][0]
+                            else:
+                                out_sp = self.schema_dtd[nextSignal]
+                            if out_sp == "":
+                                right_LM = "\n"
+                            else:
+                                right_LM = "\n||[" + nextSignal + "] attribute value"
+                else:
+                    if in_sp == "":
+                        left_LM = " "
+                        if nextSignal == "":
+                            right_LM = "\n||end"
+                        else:
+                            right_LM = "\n||[" + nextSignal + "] attribute value"
+                    else:
+                        if preSignal == "":
+                            left_LM = " "
+                        elif preSignal == inSignal:
+                            if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
+                                left_LM = " "
+                            else:
+                                left_LM = "[" + inSignal + "] attribute value||\n"
+                        else:
+                            left_LM = "[" + inSignal + "] attribute value||\n"
+
+                        if nextSignal == "":
+                            right_LM = "\n||end"
+                        elif nextSignal == inSignal:
+                            if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
+                                right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
+                            else:
+                                right_LM = "\n"
+                        else:
+                            if isinstance(self.schema_dtd[nextSignal], list):
+                                out_sp = self.schema_dtd[nextSignal][0]
+                            else:
+                                out_sp = self.schema_dtd[nextSignal]
+                            if out_sp == "":
+                                right_LM = "\n"
+                            else:
+                                right_LM = "\n||[" + nextSignal + "] attribute value"
+
+                    startIdx = content.find(in_value)
+                    if startIdx > 0:
+                        leftStr = content[0:startIdx].replace('\u3000', '')
                         if isinstance(self.schema_dtd[inSignal], list):
                             if '/' in self.schema_dtd[inSignal][0]:
                                 sp_list = self.schema_dtd[inSignal][0].split('/')
@@ -558,10 +555,243 @@ class FST:
                         if leftStr not in sp_list:
                             self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
                             print(self.schemaInfo)
+            else:
+                startIdx = content.replace('\u3000', '').find(in_value)
+                if startIdx == 0:
+                    left_LM = " "
+                else:
+                    if preSignal == "":
+                        left_LM = " "
+                    elif preSignal == inSignal:
+                        if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
+                            left_LM = " "
+                        else:
+                            left_LM = "[" + inSignal + "] attribute value||\n"
+                    else:
+                        left_LM = "[" + inSignal + "] attribute value||\n"
 
-                    if len(self.rules[out]) == 0:
-                        self.rules[out].append(rule_structure)
-                    break
+                if nextSignal == "":
+                    right_LM = "\n||end"
+                elif nextSignal == inSignal:
+                    if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
+                        right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
+                    else:
+                        right_LM = "\n"
+                else:
+                    if isinstance(self.schema_dtd[nextSignal], list):
+                        out_sp = self.schema_dtd[nextSignal][0]
+                    else:
+                        out_sp = self.schema_dtd[nextSignal]
+                    if out_sp == "":
+                        right_LM = "\n"
+                    else:
+                        right_LM = "\n||[" + nextSignal + "] attribute value"
+
+            rule_structure = {
+                'line_id': lineIds,
+                'line_pattern': pattern,
+                'left_LM': left_LM,
+                'right_LM': right_LM
+            }
+
+            # for line in lineIds:
+            #     line_id = int(line.split('-')[1])
+            #     lineInfo = line_info[line_id]
+            #
+            #     pattern = ""
+            #     attr = lineInfo['attr']
+            #     if attr.get('pattern') is not None:
+            #         pattern = attr.get('pattern')
+            #
+            #     content = lineInfo['line_content']
+            #     if isinstance(in_value, list):
+            #         value = in_value[value_idx]
+            #         # for value in in_value:
+            #         startIdx = content.find(value)
+            #         if ((startIdx == -1) & (pattern == "")) | ((startIdx == 0) & (content == value)):
+            #             if preSignal == "":
+            #                 left_LM = ""
+            #             elif preSignal == inSignal:
+            #                 left_LM = "(\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341)"
+            #             else:
+            #                 left_LM = "([" + inSignal + "] attribute value & \n)"
+            #
+            #             if nextSignal == "":
+            #                 right_LM = "\n | end"
+            #             elif nextSignal == inSignal:
+            #                 right_LM = "(\n & (\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341))"
+            #             else:
+            #                 right_LM = "(\n & [" + nextSignal + "] attribute value)"
+            #
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': left_LM,
+            #                     'right_LM': right_LM
+            #                 },
+            #                 'count': 1
+            #             }
+            #         elif (startIdx == -1) & (pattern != ""):
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "",
+            #                     'right_LM': "\n"
+            #                 },
+            #                 'count': 1
+            #             }
+            #         else:
+            #             leftStr = content[0:startIdx].replace('\u3000', '')
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "[" + inSignal + "] attribute value",
+            #                     'right_LM': "\n"
+            #                 },
+            #                 'count': 1
+            #             }
+            #
+            #             if isinstance(self.schema_dtd[inSignal], list):
+            #                 if '/' in self.schema_dtd[inSignal][0]:
+            #                     sp_list = self.schema_dtd[inSignal][0].split('/')
+            #                 else:
+            #                     sp_list = self.schema_dtd[inSignal][0]
+            #             else:
+            #                 if '/' in self.schema_dtd[inSignal]:
+            #                     sp_list = self.schema_dtd[inSignal].split('/')
+            #                 else:
+            #                     sp_list = self.schema_dtd[inSignal]
+            #
+            #             if leftStr not in sp_list:
+            #                 self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
+            #                 print(self.schemaInfo)
+            #         break
+            #     else:
+            #         startIdx = content.find(in_value)
+            #         if (startIdx == 0) & (content == in_value):
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "",
+            #                     'right_LM': "\n"
+            #                 },
+            #                 'count': 1
+            #             }
+            #         elif (startIdx == -1) & (pattern == ""):
+            #             if nextSignal == "":
+            #                 right_LM = "end"
+            #             else:
+            #                 right_LM = "(\n & [" + nextSignal + "] attribute value)"
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "([" + inSignal + "] attribute value | \n)",
+            #                     'right_LM': right_LM
+            #                 },
+            #                 'count': 1
+            #             }
+            #         elif (startIdx == -1) & (content.replace('\u3000', '') == in_value):
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "",
+            #                     'right_LM': "\n"
+            #                 },
+            #                 'count': 1
+            #             }
+            #         else:
+            #             leftStr = content[0:startIdx - 1].replace('\u3000', '')
+            #             if nextSignal == "":
+            #                 right_LM = "\n | end"
+            #             else:
+            #                 right_LM = "([" + nextSignal + "] attribute value)"
+            #             rule_structure = {
+            #                 'R': {
+            #                     'line_id': lineIds,
+            #                     'line_pattern': pattern,
+            #                     'left_LM': "([" + inSignal + "] attribute value & \n)",
+            #                     'right_LM': right_LM
+            #                 },
+            #                 'count': 1
+            #             }
+            #
+            #             if isinstance(self.schema_dtd[inSignal], list):
+            #                 if '/' in self.schema_dtd[inSignal][0]:
+            #                     sp_list = self.schema_dtd[inSignal][0].split('/')
+            #                 else:
+            #                     sp_list = self.schema_dtd[inSignal][0]
+            #             else:
+            #                 if '/' in self.schema_dtd[inSignal]:
+            #                     sp_list = self.schema_dtd[inSignal].split('/')
+            #                 else:
+            #                     sp_list = self.schema_dtd[inSignal]
+            #
+            #             if leftStr not in sp_list:
+            #                 self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
+            #                 print(self.schemaInfo)
+            #         break
+
+            if len(self.rules[out]) == 0:
+                self.rules[out] = rule_structure
+            else:
+                rule = copy.deepcopy(self.rules.get(out))
+                if '||' in rule.get('left_LM'):
+                    left_LM = rule.get('left_LM').split('||')
+                else:
+                    left_LM = list(rule.get('left_LM'))
+
+                if '||' in rule.get('right_LM'):
+                    right_LM = rule.get('right_LM').split('||')
+                else:
+                    right_LM = list(rule.get('right_LM'))
+
+                if '||' in rule_structure['left_LM']:
+                    rule_left = rule_structure['left_LM'].split('||')
+                else:
+                    rule_left = list(rule_structure['left_LM'])
+
+                for left in rule_left:
+                    if left not in left_LM:
+                        rule['left_LM'] = rule.get('left_LM') + "||" + left
+
+                if '||' in rule_structure['right_LM']:
+                    rule_right = rule_structure['right_LM'].split('||')
+                else:
+                    rule_right = list(rule_structure['right_LM'])
+
+                for right in rule_right:
+                    if right not in right_LM:
+                        rule['right_LM'] = rule.get('right_LM') + "||" + right
+
+                line_list = rule.get('line_id')
+                for lineId in lineIds:
+                    if lineId not in line_list:
+                        line_list.append(lineId)
+
+                self.rules[out] = rule
+
+                # for rule in rule_list:
+                #     if (rule.get('R').get('left_LM') == rule_structure['R']['left_LM']) & (
+                #             rule.get('R').get('right_LM') == rule_structure['R']['right_LM']):
+                #         line_list = rule.get('R').get('line_id')
+                #         for lineId in lineIds:
+                #             if lineId not in line_list:
+                #                 line_list.append(lineId)
+                #         add_new = False
+                #         break
+                #     else:
+                #         add_new = True
+                #
+                # if add_new:
+                #     self.rules[out].append(rule_structure)
+                # else:
+                #     self.rules[out] = rule_list
         print(self.rules)
 
     def learning(self):
@@ -587,14 +817,22 @@ class FST:
 
         inSignals = self.getFileInSignals()
         outSignals, outStates = fstMoore.playFST(inSignals)
+        # self.sortOutRules(outSignals)
         self.updateRules(inSignals, outSignals)
 
         print("Rule Extraction")
         return self.mealy_fst, self.moore_fst, self.rules
 
     def extraction(self):
+        fstMoore = fst(initState=self.moore_fst['initState'],
+                       states=self.moore_fst['states'],
+                       transitionFunction=self.moore_fst['transitionFunction'],
+                       outputFunction=self.moore_fst['outputFunction'],
+                       finalStates=self.moore_fst['finalStates'])
+
         soup = BeautifulSoup(self.source, "html.parser")
         line_info = self.getLineContentAttr(soup.findAll("p"))
+
 
         print("Test")
 

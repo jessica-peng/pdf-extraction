@@ -313,5 +313,20 @@ def learning_rule():
     return jsonify(schemaInfo)
 
 
+@app.route('/fileExtraction', methods=['POST'])
+def file_extraction():
+    schemaId = request.form.get('schemaId')
+    fileId = request.form.get('fileId')
+    dtd = request.form.get('dtd')
+    mapping = request.form.get('mapping')
+    content = request.form.get('content')
+    structure = json.loads(dtd)
+    mapping = json.loads(mapping)
+    fst = FST(schemaId, fileId, structure, content, mapping)
+    mealyFst, mooreFst, rules = fst.extraction()
+    result = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
+    return jsonify(result)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)

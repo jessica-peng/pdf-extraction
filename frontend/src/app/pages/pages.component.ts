@@ -214,8 +214,14 @@ export class PagesComponent implements OnInit{
                 .subscribe(result => {
                   this.pdfText = result;
                   this.resetContent(this.pdfText);
-                  if (this.fileList.length !== 1)
+                  if (this.fileList.length !== 1) {
                     console.log("Go to extract file");
+                    let content: HTMLElement = document.getElementById("pdf");
+                    this.filesService.fileExtraction(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping)
+                      .subscribe( result => {
+                        console.log(result);
+                      });
+                  }
                 });
             });
         }
