@@ -594,7 +594,7 @@ export class PagesComponent implements OnInit{
         this.pdfPositionColor[mainAttr.level1][subAttr].push(JSON.stringify(pc));
       } else {
         this.pdfStructure[mainAttr.level1][subAttr] = this.selectedText["text"];
-        this.pdfStructure[mainAttr.level1][subAttr] = JSON.stringify(pc);
+        this.pdfPositionColor[mainAttr.level1][subAttr] = JSON.stringify(pc);
       }
     }
     this.pdfStructure = JSON.parse(JSON.stringify(this.pdfStructure));

@@ -459,57 +459,60 @@ class FST:
             if isinstance(in_value, list):
                 in_value = in_value[value_idx]
 
-            if pattern == "":
+            in_sp = ""
+            out_sp = ""
+
+            if inSignal != "":
                 if isinstance(self.schema_dtd[inSignal], list):
                     in_sp = self.schema_dtd[inSignal][0]
                 else:
                     in_sp = self.schema_dtd[inSignal]
 
+            if nextSignal != "":
+                if isinstance(self.schema_dtd[nextSignal], list):
+                    out_sp = self.schema_dtd[nextSignal][0]
+                else:
+                    out_sp = self.schema_dtd[nextSignal]
+
+            if pattern == "":
                 if content == in_value:
                     if in_sp == "":
                         left_LM = " "
                         if nextSignal == "":
-                            right_LM = "\n||end"
+                            right_LM = "\n"
                         else:
-                            if isinstance(self.schema_dtd[nextSignal], list):
-                                out_sp = self.schema_dtd[nextSignal][0]
-                            else:
-                                out_sp = self.schema_dtd[nextSignal]
                             if out_sp == "":
                                 right_LM = "\n"
                             else:
-                                right_LM = "\n||[" + nextSignal + "] attribute value"
+                                right_LM = "\n||" + out_sp
                     else:
                         if preSignal == "":
                             left_LM = " "
                         elif preSignal == inSignal:
                             left_LM = " "
                         else:
-                            left_LM = "[" + inSignal + "] attribute value||\n"
+                            left_LM = in_sp + "||\n"
 
                         if nextSignal == "":
-                            right_LM = "\n||end"
+                            right_LM = "\n"
                         elif nextSignal == inSignal:
                             if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
                                 right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
                             else:
                                 right_LM = "\n"
                         else:
-                            if isinstance(self.schema_dtd[nextSignal], list):
-                                out_sp = self.schema_dtd[nextSignal][0]
-                            else:
-                                out_sp = self.schema_dtd[nextSignal]
                             if out_sp == "":
                                 right_LM = "\n"
                             else:
-                                right_LM = "\n||[" + nextSignal + "] attribute value"
+                                right_LM = "\n||" + out_sp
                 else:
                     if in_sp == "":
                         left_LM = " "
+
                         if nextSignal == "":
-                            right_LM = "\n||end"
+                            right_LM = "\n"
                         else:
-                            right_LM = "\n||[" + nextSignal + "] attribute value"
+                            right_LM = "\n||" + out_sp
                     else:
                         if preSignal == "":
                             left_LM = " "
@@ -517,26 +520,22 @@ class FST:
                             if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
                                 left_LM = " "
                             else:
-                                left_LM = "[" + inSignal + "] attribute value||\n"
+                                left_LM = in_sp + "||\n"
                         else:
-                            left_LM = "[" + inSignal + "] attribute value||\n"
+                            left_LM = in_sp + "||\n"
 
                         if nextSignal == "":
-                            right_LM = "\n||end"
+                            right_LM = "\n"
                         elif nextSignal == inSignal:
                             if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
                                 right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
                             else:
                                 right_LM = "\n"
                         else:
-                            if isinstance(self.schema_dtd[nextSignal], list):
-                                out_sp = self.schema_dtd[nextSignal][0]
-                            else:
-                                out_sp = self.schema_dtd[nextSignal]
                             if out_sp == "":
                                 right_LM = "\n"
                             else:
-                                right_LM = "\n||[" + nextSignal + "] attribute value"
+                                right_LM = "\n||" + out_sp
 
                     startIdx = content.find(in_value)
                     if startIdx > 0:
@@ -566,32 +565,28 @@ class FST:
                         if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
                             left_LM = " "
                         else:
-                            left_LM = "[" + inSignal + "] attribute value||\n"
+                            left_LM = in_sp + "||\n"
                     else:
-                        left_LM = "[" + inSignal + "] attribute value||\n"
+                        left_LM = in_sp + "||\n"
 
                 if nextSignal == "":
-                    right_LM = "\n||end"
+                    right_LM = "\n"
                 elif nextSignal == inSignal:
                     if re.match(r'^(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)\S*', content):
                         right_LM = "\n||(\u4E00|\u4E8C|\u4E09|\u56DB|\u4E94|\u516D|\u4E03|\u516B|\u4E5D|\u5341|\u58F9|\u8CB3|\u53C3|\u8086|\u4F0D|\u9678|\u67D2|\u634C|\u7396|\u62FE)"
                     else:
                         right_LM = "\n"
                 else:
-                    if isinstance(self.schema_dtd[nextSignal], list):
-                        out_sp = self.schema_dtd[nextSignal][0]
-                    else:
-                        out_sp = self.schema_dtd[nextSignal]
                     if out_sp == "":
                         right_LM = "\n"
                     else:
-                        right_LM = "\n||[" + nextSignal + "] attribute value"
+                        right_LM = "\n||" + out_sp
 
             rule_structure = {
-                'line_id': lineIds,
-                'line_pattern': pattern,
-                'left_LM': left_LM,
-                'right_LM': right_LM
+                "line_id": lineIds,
+                "line_pattern": pattern,
+                "left_LM": left_LM,
+                "right_LM": right_LM
             }
 
             # for line in lineIds:
