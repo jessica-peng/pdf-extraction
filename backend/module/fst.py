@@ -149,7 +149,7 @@ class FST:
         soup = BeautifulSoup(self.source, "html.parser")
         lines = soup.findAll("p")
         this_state = "GB"
-        skip_line = []
+        # skip_line = []
         for line in lines:
             spams = line.findAll("spam")
             line_content = ""
@@ -157,8 +157,8 @@ class FST:
                 line_content = line_content + spam.getText()
 
             attrs = line.attrs
-            if attrs['id'] in skip_line:
-                continue
+            # if attrs['id'] in skip_line:
+            #     continue
 
             if attrs.get('pattern') is None:
                 if "　" in line_content:
@@ -181,11 +181,11 @@ class FST:
             if attrs['id'] not in lineId:
                 continue
 
-            transition = [this_state, mappingKey, sp]
+            transition = [this_state, "I"+mappingKey, sp]
             if transition not in self.mealy_fst['transitionFunction']:
                 self.mealy_fst['transitionFunction'].append(transition)
 
-            output = [this_state, mappingKey, "R"+mappingKey]
+            output = [this_state, mappingKey, "O"+mappingKey]
             if output not in self.mealy_fst['outputFunction']:
                 self.mealy_fst['outputFunction'].append(output)
             this_state = sp
@@ -214,7 +214,7 @@ class FST:
         soup = BeautifulSoup(self.source, "html.parser")
         lines = soup.findAll("p")
         this_state = "GB"
-        skip_line = []
+        # skip_line = []
         for line in lines:
             spams = line.findAll("spam")
             line_content = ""
@@ -222,8 +222,8 @@ class FST:
                 line_content = line_content + spam.getText()
 
             attrs = line.attrs
-            if attrs['id'] in skip_line:
-                continue
+            # if attrs['id'] in skip_line:
+            #     continue
 
             if attrs.get('pattern') is None:
                 if "　" in line_content:
@@ -246,11 +246,11 @@ class FST:
             if attrs['id'] not in lineId:
                 continue
 
-            transition = [this_state, mappingKey, sp]
+            transition = [this_state, "I" + mappingKey, sp]
             if transition not in self.moore_fst['transitionFunction']:
                 self.moore_fst['transitionFunction'].append(transition)
 
-            output = [sp, "R" + mappingKey]
+            output = [sp, "O" + mappingKey]
             if output not in self.moore_fst['outputFunction']:
                 self.moore_fst['outputFunction'].append(output)
             this_state = sp
@@ -293,7 +293,7 @@ class FST:
             lineId = self.getLineId(sp)
             if attrs['id'] not in lineId:
                 continue
-            inSignals.append(mappingKey)
+            inSignals.append("I" + mappingKey)
 
         print(inSignals)
         return inSignals
@@ -390,6 +390,7 @@ class FST:
         new_inSignals = list()
         temp = ""
         for input in inSignals:
+            input = input[1:]
             if temp != input:
                 original_inSignals.append(input)
                 temp = input
@@ -397,21 +398,24 @@ class FST:
         for input in original_inSignals:
             inSignal = self.getMappingKey(input)
             if isinstance(self.new_dtd[inSignal], str):
-                new_inSignals.append(input)
+                new_inSignals.append("I" + input)
             else:
                 list_length = len(self.new_dtd[inSignal])
                 for i in range(0, list_length):
-                    new_inSignals.append(input)
+                    new_inSignals.append("I" + input)
 
+        original_inSignals = list()
         for new_input in new_inSignals:
-            new_outSignals.append('R' + new_input)
+            input = new_input[1:]
+            new_outSignals.append('O' + input)
+            original_inSignals.append(input)
 
-        return new_inSignals, new_outSignals
+        return original_inSignals, new_inSignals, new_outSignals
 
     def updateRules(self, inSignals, outSignals):
         soup = BeautifulSoup(self.source, "html.parser")
         line_info = self.getLineContentAttr(soup.findAll("p"))
-        inSignals, outSignals = self.resetSignal(inSignals, outSignals)
+        signals, inSignals, outSignals = self.resetSignal(inSignals, outSignals)
         value_idx = -1
         out_temp = ''
         for idx, out in enumerate(outSignals):
@@ -420,15 +424,16 @@ class FST:
                 value_idx = 0
             else:
                 value_idx = value_idx + 1
+            signal = signals[idx]
             if out not in self.rules.keys():
-                self.rules[out] = {}
-            inSignal = inSignals[idx]
+                self.rules[signal] = {}
+            inSignal = signal
             preSignal = ""
             if idx != 0:
-                preSignal = inSignals[idx - 1]
+                preSignal = signals[idx - 1]
             nextSignal = ""
             if idx != len(outSignals) - 1:
-                nextSignal = inSignals[idx + 1]
+                nextSignal = signals[idx + 1]
             inSignal = self.getMappingKey(inSignal)
             preSignal = self.getMappingKey(preSignal)
             nextSignal = self.getMappingKey(nextSignal)
@@ -589,153 +594,10 @@ class FST:
                 "right_LM": right_LM
             }
 
-            # for line in lineIds:
-            #     line_id = int(line.split('-')[1])
-            #     lineInfo = line_info[line_id]
-            #
-            #     pattern = ""
-            #     attr = lineInfo['attr']
-            #     if attr.get('pattern') is not None:
-            #         pattern = attr.get('pattern')
-            #
-            #     content = lineInfo['line_content']
-            #     if isinstance(in_value, list):
-            #         value = in_value[value_idx]
-            #         # for value in in_value:
-            #         startIdx = content.find(value)
-            #         if ((startIdx == -1) & (pattern == "")) | ((startIdx == 0) & (content == value)):
-            #             if preSignal == "":
-            #                 left_LM = ""
-            #             elif preSignal == inSignal:
-            #                 left_LM = "(\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341)"
-            #             else:
-            #                 left_LM = "([" + inSignal + "] attribute value & \n)"
-            #
-            #             if nextSignal == "":
-            #                 right_LM = "\n | end"
-            #             elif nextSignal == inSignal:
-            #                 right_LM = "(\n & (\u4E00 | \u4E8C | \u4E09 | \u56DB | \u4E94 | \u516D | \u4E03 | \u516B | \u4E5D | \u5341))"
-            #             else:
-            #                 right_LM = "(\n & [" + nextSignal + "] attribute value)"
-            #
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': left_LM,
-            #                     'right_LM': right_LM
-            #                 },
-            #                 'count': 1
-            #             }
-            #         elif (startIdx == -1) & (pattern != ""):
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "",
-            #                     'right_LM': "\n"
-            #                 },
-            #                 'count': 1
-            #             }
-            #         else:
-            #             leftStr = content[0:startIdx].replace('\u3000', '')
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "[" + inSignal + "] attribute value",
-            #                     'right_LM': "\n"
-            #                 },
-            #                 'count': 1
-            #             }
-            #
-            #             if isinstance(self.schema_dtd[inSignal], list):
-            #                 if '/' in self.schema_dtd[inSignal][0]:
-            #                     sp_list = self.schema_dtd[inSignal][0].split('/')
-            #                 else:
-            #                     sp_list = self.schema_dtd[inSignal][0]
-            #             else:
-            #                 if '/' in self.schema_dtd[inSignal]:
-            #                     sp_list = self.schema_dtd[inSignal].split('/')
-            #                 else:
-            #                     sp_list = self.schema_dtd[inSignal]
-            #
-            #             if leftStr not in sp_list:
-            #                 self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
-            #                 print(self.schemaInfo)
-            #         break
-            #     else:
-            #         startIdx = content.find(in_value)
-            #         if (startIdx == 0) & (content == in_value):
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "",
-            #                     'right_LM': "\n"
-            #                 },
-            #                 'count': 1
-            #             }
-            #         elif (startIdx == -1) & (pattern == ""):
-            #             if nextSignal == "":
-            #                 right_LM = "end"
-            #             else:
-            #                 right_LM = "(\n & [" + nextSignal + "] attribute value)"
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "([" + inSignal + "] attribute value | \n)",
-            #                     'right_LM': right_LM
-            #                 },
-            #                 'count': 1
-            #             }
-            #         elif (startIdx == -1) & (content.replace('\u3000', '') == in_value):
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "",
-            #                     'right_LM': "\n"
-            #                 },
-            #                 'count': 1
-            #             }
-            #         else:
-            #             leftStr = content[0:startIdx - 1].replace('\u3000', '')
-            #             if nextSignal == "":
-            #                 right_LM = "\n | end"
-            #             else:
-            #                 right_LM = "([" + nextSignal + "] attribute value)"
-            #             rule_structure = {
-            #                 'R': {
-            #                     'line_id': lineIds,
-            #                     'line_pattern': pattern,
-            #                     'left_LM': "([" + inSignal + "] attribute value & \n)",
-            #                     'right_LM': right_LM
-            #                 },
-            #                 'count': 1
-            #             }
-            #
-            #             if isinstance(self.schema_dtd[inSignal], list):
-            #                 if '/' in self.schema_dtd[inSignal][0]:
-            #                     sp_list = self.schema_dtd[inSignal][0].split('/')
-            #                 else:
-            #                     sp_list = self.schema_dtd[inSignal][0]
-            #             else:
-            #                 if '/' in self.schema_dtd[inSignal]:
-            #                     sp_list = self.schema_dtd[inSignal].split('/')
-            #                 else:
-            #                     sp_list = self.schema_dtd[inSignal]
-            #
-            #             if leftStr not in sp_list:
-            #                 self.schemaInfo = self.updateSchemaDtd(inSignal, leftStr)
-            #                 print(self.schemaInfo)
-            #         break
-
-            if len(self.rules[out]) == 0:
-                self.rules[out] = rule_structure
+            if len(self.rules[signal]) == 0:
+                self.rules[signal] = rule_structure
             else:
-                rule = copy.deepcopy(self.rules.get(out))
+                rule = copy.deepcopy(self.rules.get(signal))
                 if '||' in rule.get('left_LM'):
                     left_LM = rule.get('left_LM').split('||')
                 else:
@@ -769,24 +631,8 @@ class FST:
                     if lineId not in line_list:
                         line_list.append(lineId)
 
-                self.rules[out] = rule
+                self.rules[signal] = rule
 
-                # for rule in rule_list:
-                #     if (rule.get('R').get('left_LM') == rule_structure['R']['left_LM']) & (
-                #             rule.get('R').get('right_LM') == rule_structure['R']['right_LM']):
-                #         line_list = rule.get('R').get('line_id')
-                #         for lineId in lineIds:
-                #             if lineId not in line_list:
-                #                 line_list.append(lineId)
-                #         add_new = False
-                #         break
-                #     else:
-                #         add_new = True
-                #
-                # if add_new:
-                #     self.rules[out].append(rule_structure)
-                # else:
-                #     self.rules[out] = rule_list
         print(self.rules)
 
     def learning(self):
@@ -805,8 +651,8 @@ class FST:
                        transitionFunction=self.moore_fst['transitionFunction'],
                        outputFunction=self.moore_fst['outputFunction'],
                        finalStates=self.moore_fst['finalStates'])
-        # graph = graphviz.Source(fstUtils.toDot(fstMoore))
-        # graph.view('fst_graph_moore', cleanup=True)
+        graph = graphviz.Source(fstUtils.toDot(fstMoore))
+        graph.view('fst_graph_moore', cleanup=True)
 
         print("updated FST")
 
