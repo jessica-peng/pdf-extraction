@@ -67,7 +67,7 @@ class PrefixSpan:
                                     continue
 
                                 if self.tokens.get('Number'):
-                                    if re.match(r'^(-|)\d*$', checkline):
+                                    if re.match(r'^(-|)\d+(,|.|)\d*$', checkline):
                                         continue
                                     if '0000000000000000' in checkline:
                                         continue
@@ -232,6 +232,7 @@ class PrefixSpan:
 
         # 匯出資料
         df = pd.json_normalize(new_datas)
+        # df = pd.json_normalize(datas)
         df.to_csv(self.prepare, index=False, encoding='utf-8-sig')
         new_datas.clear()
         datas.clear()
@@ -245,10 +246,13 @@ class PrefixSpan:
         dbs = []
         for data in df['string']:
             db = []
-            split_str = re.split(r'\s+', data)
+            split_str = re.split(r'\s+|\uFF1A', str(data))
+            # data = data.replace('【', ' 【').replace('：', '： ')
+            split_str = re.split(r'\s+', str(data))
             for element in split_str:
                 db.append(element)
             dbs.append(db)
+        print(dbs)
 
         # Pattern 過濾：利用取出的 Pattern 自動比對案件內容，濾除不存在的 Pattern
         merge_list = []
@@ -277,7 +281,7 @@ class PrefixSpan:
                 is_valid = True
                 merge_str = ''
                 for item in result[1]:
-                    merge_str = merge_str + item.replace("'", "")
+                    merge_str = merge_str + item#.replace("'", "") .replace('【', '').replace('】', '')
                     if self.tokens.get('Basic symbol'):
                         # 、,。,〃,〈,〉,《,》,「,」,『,』
                         if re.match(r'\S*([\u3001-\u3003]|[\u3008-\u3009]|[\u300A-\u300F])$', item):
@@ -310,9 +314,13 @@ class PrefixSpan:
                         continue
 
                 if is_valid:
+                    if merge_str == '':
+                        continue
+
                     # Pattern 過濾：利用取出的 Pattern 自動比對案件內容，濾除不存在的 Pattern
                     for merge in merge_list:
-                        if merge_str in merge:
+                        if str(merge_str) in str(merge):
+                            exist = True
                             data = {
                                 "frequency": result[0],
                                 "itemset": result[1],
@@ -328,7 +336,7 @@ class PrefixSpan:
             data = str(o['merge'])
             invalid = False
             if self.tokens.get('Limit pattern length'):
-                if len(data) < 2:
+                if len(data) < self.patternMin:
                     continue
             if self.tokens.get('Duplicate characters'):
                 if data[0] == data[len(data) - 1]:
@@ -380,6 +388,9 @@ class PrefixSpan:
         return pattern_list
 
     def executePrefixSpan(self):
+        start = time.time()
         self.prepare_file()
         pattern_list = self.prefixSpan_analyze()
+        end = time.time()
+        print("執行時間：%f 秒" % (end - start))
         return pattern_list

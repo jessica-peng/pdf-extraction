@@ -33,18 +33,13 @@ export class CommonService {
     return (sameNum/length) * 100 || 0
   }
 
-  uploadFiles(filesPath: string, type: string, selectedFile:File[]): Observable<string> {
+  uploadFiles(schemaId: string, type: string, selectedFile:File[]): Observable<string> {
     let fd = new FormData();
     for (let i = 0; i < selectedFile.length; i++) {
       fd.append(selectedFile[i].name, selectedFile[i])
     }
 
-    return this.http.post<string>(this.baseApiUrl + 'uploadFiles', fd,
-      {
-        headers: new HttpHeaders()
-          .set('files_path', filesPath)
-          .set('upload_type', type)
-      });
+    return this.http.post<string>(this.baseApiUrl + 'uploadFiles/' + schemaId + '/' + type, fd);
   }
 
   schemaMining(filesPath: string, schemaId: string, minSupport: number, patternMin: number, patternMax: number, token: any[]): Observable<any> {
@@ -58,10 +53,11 @@ export class CommonService {
     return this.http.post<any>(this.baseApiUrl + 'schemaMining', params);
   }
 
-  readTextFileOfPDF(filesPath: string, filename: string):  Observable<string> {
+  readTextFileOfPDF(filesPath: string, filename: string, filetype: string):  Observable<string> {
     const params = new HttpParams()
       .set('files_path', filesPath)
-      .set('filename', filename);
+      .set('filename', filename)
+      .set('filetype', filetype);
     return this.http.get<string>(this.baseApiUrl + 'readTextFileOfPDF',
     {
       params: params

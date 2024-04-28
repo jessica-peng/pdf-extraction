@@ -32,6 +32,8 @@ export class PagesComponent implements OnInit{
   schema = new FormControl<Schema>(null, [Validators.required]);
   files = new FormControl<string>('', [Validators.required]);
   schemaList: Schema[];
+  methodList: string[] = ['FST', 'Langchain-OutputParsing'];
+  fileTypeList: string[] = ['文本', '表單', '表格', '財務報表'];
   filteredSchemaList: Observable<Schema[]>;
   selectedSchema = null;
   selectedFiles: File[];
@@ -40,9 +42,9 @@ export class PagesComponent implements OnInit{
   schemaOpenState = false;
   markedOpenState = false;
 
-  min_support: number = 0.1;
+  min_support: number = 0.5;
   pattern_min: number = 2;
-  pattern_max: number = 5;
+  pattern_max: number = 10;
 
   tokens = [
     {name: 'Basic symbol', checked: false},
@@ -81,6 +83,8 @@ export class PagesComponent implements OnInit{
   selectPreAttr: string = '';
 
   selectSchemaForMarked = null;
+  selectMethodForMarked = 'FST';
+  selectFileTypeForMarked = null;
   selectFileForMarked: FileInfo = null;
   fileList: FileInfo[] = [];
   selectedFileTest: File;
@@ -173,7 +177,7 @@ export class PagesComponent implements OnInit{
 
   protected fileUpload(files_path: string, type: string, tokens: any[]) {
     console.log("Upload file for Schema to " + files_path);
-    this.commonService.uploadFiles(files_path, type, this.uploadFiles)
+    this.commonService.uploadFiles(this.schemaId, type, this.uploadFiles)
       .subscribe( result => {
         console.log(result);
 
@@ -191,37 +195,55 @@ export class PagesComponent implements OnInit{
           this.schemaService.updateFileListOfSchema(this.schemaId, this.uploadFiles[0].name)
             .subscribe( data => {
               this.fileList = data.file_list;
-              console.log(this.uploadFiles[0].name + " upload success!");
-
               let fileId = this.fileList.find(file => file.name === this.uploadFiles[0].name).id;
               this.selectFileForMarked = this.fileList.find(file => file.name === this.uploadFiles[0].name);
+              console.log(this.uploadFiles[0].name + " upload success!");
               this.filesService.addFileInfo(data.schema_id, fileId, data.dtd)
                 .subscribe(result => {
                   this.selectFileInfo = result;
-                  this.pdfStructure = result.structure;
+                  this.pdfStructure = result.instance;
                   this.pdfPositionColor = result.position;
                   this.cd.detectChanges();
                   let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
                   for (let i = 0; i < json_viewer.length; i++) {
                     json_viewer[i].style.position = 'initial';
                   }
-                  this.getAttributeListWithLevel(result.structure);
+                  this.getAttributeListWithLevel(result.instance);
                   console.log(result);
                 });
 
               let path = this.selectSchemaInfo.files_path + type;
-              this.commonService.readTextFileOfPDF(path, this.uploadFiles[0].name)
+              this.commonService.readTextFileOfPDF(path, this.uploadFiles[0].name, this.selectFileTypeForMarked)
                 .subscribe(result => {
                   this.pdfText = result;
                   this.resetContent(this.pdfText);
-                  if (this.fileList.length !== 1) {
-                    console.log("Go to extract file");
-                    let content: HTMLElement = document.getElementById("pdf");
-                    this.filesService.fileExtraction(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping)
+                  console.log("Go to extract file");
+                  let content: HTMLElement = document.getElementById("pdf");
+                  if (this.selectMethodForMarked === 'FST') {
+                    this.filesService.fileExtraction(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping, this.mainAttrList, this.selectFileTypeForMarked)
+                    .subscribe( result => {
+                      this.pdfStructure = result.instance;
+                      this.markTextContent(result.position);
+                      this.cd.detectChanges();
+                      let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+                      for (let i = 0; i < json_viewer.length; i++) {
+                          json_viewer[i].style.position = 'initial';
+                      }
+                      console.log(result);
+                    });
+                  } else if (this.selectMethodForMarked === 'Langchain-OutputParsing') {
+                      this.filesService.fileExtractionByLangChain(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.mainAttrList, 'LCOP')
                       .subscribe( result => {
+                        this.pdfStructure = result.instance;
+                        this.markTextContent(result.position);
+                        this.cd.detectChanges();
+                        let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
+                        for (let i = 0; i < json_viewer.length; i++) {
+                            json_viewer[i].style.position = 'initial';
+                        }
                         console.log(result);
                       });
-                  }
+                    }
                 });
             });
         }
@@ -253,7 +275,7 @@ export class PagesComponent implements OnInit{
       this.schemaService.addSchema(this.userId, schema, this.min_support, tokens)
       .subscribe(data => {
         this.schemaId = data.schema_id;
-        this.fileUpload(data.files_path, "pattern", tokens);
+        this.fileUpload(data.files_path, "pattern", JSON.parse(JSON.stringify(this.tokens)));
         console.log(data);
       });
     }
@@ -463,6 +485,10 @@ export class PagesComponent implements OnInit{
     console.log(selectSchema);
   }
 
+  changeMethod(selectMethod: string): void {
+    console.log(selectMethod);
+  }
+
   uploadFileTest(event): void {
     this.selectedFileTest = <File>event.target.files[0];
     let fileName = this.selectedFileTest.name;
@@ -484,22 +510,21 @@ export class PagesComponent implements OnInit{
 
   changePDFFile(fileInfo: FileInfo): void {
     let path = this.selectSchemaInfo.files_path + "test";
-    this.commonService.readTextFileOfPDF(path, fileInfo.name)
+    this.commonService.readTextFileOfPDF(path, fileInfo.name, this.selectFileTypeForMarked)
       .subscribe(result => {
         this.pdfText = result;
         this.resetContent(this.pdfText);
-
         this.filesService.getFileInfo(this.selectSchemaInfo.schema_id, fileInfo.id)
           .subscribe(result => {
             this.selectFileInfo = result;
-            this.pdfStructure = result.structure;
+            this.pdfStructure = result.instance;
             this.pdfPositionColor = result.position;
             this.cd.detectChanges();
             let json_viewer = document.getElementsByClassName("toggler") as HTMLCollectionOf<HTMLElement>;
             for (let i = 0; i < json_viewer.length; i++) {
                 json_viewer[i].style.position = 'initial';
             }
-            this.getAttributeListWithLevel(result.structure);
+            this.getAttributeListWithLevel(result.instance);
             this.markTextContent(this.pdfPositionColor);
           });
       });
@@ -606,7 +631,7 @@ export class PagesComponent implements OnInit{
     for (let i = 0; i < json_viewer.length; i++) {
         json_viewer[i].style.position = 'initial';
     }
-    this.selectedText = {text: "", start: -1, end: -1};
+    this.selectedText = {text: "", lineId:[], start: -1, end: -1};
   }
 
   saveFileStructure(): void {
@@ -614,11 +639,17 @@ export class PagesComponent implements OnInit{
     this.filesService.updateStructureById(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, this.pdfPositionColor)
       .subscribe(result => {
         window.alert("Save completed");
-      });
-
-    this.schemaService.learningRule(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping)
-      .subscribe( result => {
-        console.log(result);
+        if (this.selectMethodForMarked === 'FST') {
+          this.schemaService.learningRule(this.selectFileInfo.schema_id, this.selectFileInfo.file_id, this.pdfStructure, content.outerHTML, this.selectSchemaInfo.mapping, this.selectFileTypeForMarked)
+          .subscribe( result => {
+            console.log(result);
+          });
+        } else if (this.selectMethodForMarked === 'Langchain-OutputParsing') {
+          this.schemaService.updatePatternsByLangchain(this.selectFileInfo.schema_id, this.pdfStructure, content.outerHTML)
+          .subscribe( result => {
+            console.log(result);
+          });
+        }
       });
   }
 
@@ -669,7 +700,7 @@ export class PagesComponent implements OnInit{
             let attrArray = structure[key1[i]][0].split('/');
             for (let a = 0; a < attrArray.length; a++) {
               let ratio = distance(attrArray[a], text);
-              if (ratio <= 0) {
+              if (ratio < 1) {
                 if (pattern === "")
                   pattern = key1[i];
                 else
@@ -686,7 +717,7 @@ export class PagesComponent implements OnInit{
                 let attrArray = structure[key1[i]][key2[j]][0].split('/');
                 for (let a = 0; a < attrArray.length; a++) {
                   let ratio = distance(attrArray[a], text);
-                  if (ratio <= 0) {
+                  if (ratio < 1) {
                     if (pattern === "")
                       pattern = key1[i] + "." + key2[j];
                     else
@@ -704,7 +735,7 @@ export class PagesComponent implements OnInit{
         let attrArray = structure[key1[i]].split('/');
         for (let a = 0; a < attrArray.length; a++) {
           let ratio = distance(attrArray[a], text);
-          if (ratio <= 0) {
+          if (ratio < 1) {
             if (pattern === "")
               pattern = key1[i];
             else
@@ -725,8 +756,7 @@ export class PagesComponent implements OnInit{
                .replace(/\\n/g, '<br/>')
                .replace(/\n/g, '<br/>')
     let content = text.split("<br/>");
-
-    let textContent = document.getElementById("textContent");
+    let textContent = document.getElementById('textContent');
     if (textContent.children.length > 0) {
       textContent.removeChild(document.getElementById("pdf"));
     }
@@ -737,7 +767,7 @@ export class PagesComponent implements OnInit{
     for (let i = 0; i < content.length; i++) {
       let pattern = "";
       if (content[i].length > 1) {
-        pattern = this.getPatternAttr(this.selectSchemaInfo.dtd, content[i]);
+        pattern = this.getPatternAttr(this.selectSchemaInfo.dtd, content[i].replace('：', '：　'));
       }
 
       let lineContent = document.createElement('p');
@@ -746,12 +776,12 @@ export class PagesComponent implements OnInit{
         lineContent.setAttribute('pattern', pattern);
       for (let j = 0; j < content[i].length; j++)
       {
-        let spam = document.createElement('spam');
-        spam.innerHTML = content[i].charAt(j);
-        spam.dataset["value"] = String(dataIdx);
-        spam.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        let span = document.createElement('span');
+        span.innerHTML = content[i].charAt(j);
+        span.dataset["value"] = String(dataIdx);
+        span.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
         dataIdx = dataIdx + 1;
-        lineContent.appendChild(spam);
+        lineContent.appendChild(span);
       }
       pdfContent.appendChild(lineContent);
     }
@@ -870,6 +900,33 @@ export class PagesComponent implements OnInit{
                         p.insertBefore(btn,children[i]);
                     }
                   }
+                }
+              }
+            } else {
+              if (pdfPC[key1[i]][key2[j]] === "")
+                continue;
+              let pc = JSON.parse(pdfPC[key1[i]][key2[j]]);
+              let line = pc.lineId;
+              let start = pc.start;
+              let end = pc.end;
+              let color = pc.color;
+              let id = key1[i] + "-" + key2[j];
+              let btn = this.setRemoveBtn(id, 99);
+              let idx = parseInt(start);
+
+              for (const l of line) {
+                let p = document.getElementById(l);
+                let children = p.children;
+                for (let i = 0; i < p.childNodes.length; i++) {
+                  let dataset = p.childNodes[i]["dataset"].value;
+                  if (parseInt(dataset) >= end) break;
+                  if (parseInt(dataset) === idx) {
+                    children[i]["style"].backgroundColor = 'rgba(' + color["r"] + ',' + color["g"] + ',' +
+                          color["b"] + ',' + 0.3 + ')';
+                    idx = idx + 1;
+                  }
+                  if (parseInt(dataset) === parseInt(start))
+                    p.insertBefore(btn,children[i]);
                 }
               }
             }

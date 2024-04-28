@@ -32,9 +32,10 @@ class Schema:
             "attributes": [],
             "dtd": "",
             "mapping": {},
-            "mealyFst": {},
-            "mooreFst": {},
-            "rules": {},
+            "mealy_fst": {},
+            "moore_fst": {},
+            "softmealy_fst": {},
+            "extraction_rules": {},
             "file_list": [],
             "files_path": "",
             "update_time": datetime.datetime.utcnow()
@@ -49,7 +50,7 @@ class Files:
         self.files = {
             "schema_id": "",
             "file_id": "",
-            "structure": {},
+            "instance": {},
             "position": {},
             "update_time": datetime.datetime.utcnow()
         }

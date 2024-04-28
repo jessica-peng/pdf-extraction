@@ -40,7 +40,7 @@ class Entity:
         schemaInfo = schema_collection.find_one({"_id": ObjectId(_id)}, {"_id": 0})
         return schemaInfo
 
-    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd, pdfFile, mapping, mealyFst, mooreFst, rules):
+    def updateSchema(self, schemaId, ignoreTokes, minSupport, patternList, attribute, dtd, pdfFile, mapping, mealyFst, mooreFst, softmealyFst, rules):
         schema_collection = self.database.get_collection("schema")
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         if ignoreTokes == "":
@@ -62,8 +62,10 @@ class Entity:
             mealyFst = schemaInfo['mealy_fst']
         if mooreFst == "":
             mooreFst = schemaInfo['moore_fst']
+        if softmealyFst == "":
+            softmealyFst = schemaInfo['softmealy_fst']
         if rules == "":
-            rules = schemaInfo['rules']
+            rules = schemaInfo['extraction_rules']
         if pdfFile == "":
             file_list = schemaInfo['file_list']
         else:
@@ -78,10 +80,26 @@ class Entity:
                                                                         "mapping": mapping,
                                                                         "mealy_fst": mealyFst,
                                                                         "moore_fst": mooreFst,
-                                                                        "rules": rules,
+                                                                        "softmealy_fst": softmealyFst,
+                                                                        "extraction_rules": rules,
                                                                         "file_list": file_list}})
         schemaInfo = schema_collection.find_one({"schema_id": schemaId}, {"_id": 0})
         return schemaInfo
+
+    def updateNewStructureToFile(self, schemaId):
+        files_collection = self.database.get_collection("files")
+        pipline = [{'$match': {'schema_id': '4869dc7b98d645ef86519a63c745e99d'}},
+                   {'$addFields': {'instance': {'last_updated': ''},
+                                   'position': {'last_updated': ''}}}]
+        result = files_collection.aggregate(pipline)
+        for d in result:
+            print(d)
+            fileId = d.get("file_id")
+            files_collection.update_one({"schema_id": schemaId, "file_id": fileId},
+                                        {"$set": d})
+
+        filesInfo = files_collection.find_one({"schema_id": schemaId, "file_id": '8c2bd686e7f4418b80a698174899510a'}, {"_id": 0})
+        print(filesInfo)
 
     def insertFiles(self, files):
         files_collection = self.database.get_collection("files")
@@ -96,7 +114,7 @@ class Entity:
 
     def updateStructureById(self, schemaId, fileId, structure, pc):
         files_collection = self.database.get_collection("files")
-        files_collection.update_one({"schema_id": schemaId, "file_id": fileId}, {"$set": {"structure": structure,
+        files_collection.update_one({"schema_id": schemaId, "file_id": fileId}, {"$set": {"instance": structure,
                                                                                           "position": pc}})
         filesInfo = files_collection.find_one({"schema_id": schemaId, "file_id": fileId}, {"_id": 0})
         return filesInfo

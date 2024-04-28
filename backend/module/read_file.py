@@ -37,8 +37,9 @@ def save_txt_file(pdf, filename):
 
 
 class Read_File:
-    def __init__(self, path):
+    def __init__(self, path, filetype):
         self.path = path
+        self.filetype = filetype
 
     def read_pdf_file_dict(self):
         print(os.getcwd())
@@ -89,17 +90,32 @@ class Read_File:
         f = open(text_file, 'r', encoding='utf-8')
         text = ''
         for line in f.readlines():
-            text_line = re.sub(r'^(\s\s|)[0-9][0-9]+\n', '', line)
-            text_line = re.sub(r'^[１-９]', '', text_line)
-            text_line = re.sub(r'^[0-9]$', '', text_line)
-            text_line = re.sub(r' ', '', text_line)
-            text_line = re.sub(r'^　', '', text_line)
-            text_line = re.sub(r'^\n', '', text_line)
-            text = text + text_line
+            if self.filetype == '文本':
+                text_line = re.sub(r'^(\s\s|\s|)[0-9][0-9]+\n', '', line)
+                text_line = re.sub(r'^[０-９]', '', text_line)
+                text_line = re.sub(r'^(\s|)[0-9]([0-9]|)$', '', text_line)
+                text_line = re.sub(r' ', '', text_line)
+                text_line = re.sub(r'^(\u3000|\u00A0|\u0020)*', '', text_line)
+                text_line = re.sub(r'^\n', '', text_line)
+                text = text + text_line
+            else:
+                # text_line = re.sub(r'^(\s\s|\s|)[0-9][0-9]+\n', '', line)
+                text_line = re.sub(r'^[０-９]', '', line)
+                # text_line = re.sub(r'^(\s|)[0-9]([0-9]|)$', '', text_line)
+                text_line = re.sub(r' ', '', text_line)
+                text_line = re.sub(r'^(\u3000|\u00A0|\u0020)*', '', text_line)
+                text_line = re.sub(r'^\n', '', text_line)
+                text = text + text_line
 
         line_list = text.split('\n')
         text = ''
+        tmp_line = ''
         for line in line_list:
+            if self.filetype == '文本':
+                if line == tmp_line:
+                    continue
+
+            tmp_line = line
             if '\u3000' in line:
                 word_list = line.split('\u3000')
                 for word in word_list:
@@ -129,5 +145,6 @@ class Read_File:
 
         text = text[:-1]
         print(text)
+        print("length = " + str(len(text)))
         f.close()
         return text

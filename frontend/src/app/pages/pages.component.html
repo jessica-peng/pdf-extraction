@@ -318,10 +318,9 @@
 
     </mat-expansion-panel>
 
-
-    <mat-expansion-panel (opened)="markedOpenState = true" (closed)="markedOpenState = false" expanded>
+    <mat-expansion-panel (opened)="markedOpenState = true" (closed)="markedOpenState = false">
       <mat-expansion-panel-header>
-        <mat-panel-title> Text Marked </mat-panel-title>
+        <mat-panel-title> Text Extraction </mat-panel-title>
       </mat-expansion-panel-header>
       <div style="height: 100%; width: 100%; overflow-y: auto">
         <div class="marked-setting">
@@ -331,6 +330,22 @@
               <mat-select [(ngModel)]="selectSchemaForMarked" name="schema" (selectionChange)="changeSchema(selectSchemaForMarked)">
                 <mat-option *ngFor="let schema of schemaList" [value]="schema">
                   {{schema.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 20%; margin: 0 20px; display: none;">
+              <mat-label>Choose a method</mat-label>
+              <mat-select [(ngModel)]="selectMethodForMarked" name="schema" (selectionChange)="changeMethod(selectMethodForMarked)">
+                <mat-option *ngFor="let method of methodList" [value]="method">
+                  {{method}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 20%; margin: 0 20px;">
+              <mat-label>Choose file type</mat-label>
+              <mat-select [(ngModel)]="selectFileTypeForMarked" name="fileType" (selectionChange)="changeMethod(selectFileTypeForMarked)">
+                <mat-option *ngFor="let fileType of fileTypeList" [value]="fileType">
+                  {{fileType}}
                 </mat-option>
               </mat-select>
             </mat-form-field>

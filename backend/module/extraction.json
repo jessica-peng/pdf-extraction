@@ -1,0 +1,700 @@
+{
+    "filename": "01-《心心向榮》《海之京都丹後天橋立5日》美山町.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "5",
+        "number_of_people_traveling": "16",
+        "group_seat": "32",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉31⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "京都/⼤阪,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 26380,
+    "total_cost": 0.05276
+}
+{
+    "filename": "02-上帝的部落.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "7⼈",
+        "number_of_people_traveling": "6⼈",
+        "group_seat": "8⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉04⽇",
+        "travel_days": "3天2夜",
+        "departure_airport_place": "",
+        "tourist_destination": "新⽵縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 10352,
+    "total_cost": 0.020704
+}
+{
+    "filename": "03-布里斯本+黃金海岸六日遊.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "31⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "32⼈",
+        "group_status": "現正熱賣",
+        "deposit": "20,000元",
+        "total_price": "",
+        "departure_date": "08⽉31⽇",
+        "travel_days": "6天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "布⾥斯班/黃⾦海岸,澳⼤利亞",
+        "last_updated": ""
+    },
+    "total_tokens": 21635,
+    "total_cost": 0.04327
+}
+{
+    "filename": "04-漫遊四國~小豆島、倉敷美觀、雙溫泉6日(廣島進出).pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "2人",
+        "number_of_people_traveling": "16人",
+        "group_seat": "23人",
+        "group_status": "現正熱賣",
+        "deposit": "12,000元",
+        "total_price": "",
+        "departure_date": "08⽉17⽇",
+        "travel_days": "6天5夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "島根縣/廣島/⿃取/岡⼭,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 26595,
+    "total_cost": 0.05319
+}
+{
+    "filename": "05-馬爾地夫蜜月島含三餐６日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "4⼈",
+        "number_of_people_traveling": "2⼈",
+        "group_seat": "4⼈",
+        "group_status": "額滿",
+        "deposit": "30,000元",
+        "total_price": "",
+        "departure_date": "08⽉19⽇",
+        "travel_days": "6天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "⾺爾地夫",
+        "last_updated": ""
+    },
+    "total_tokens": 18880,
+    "total_cost": 0.037759999999999995
+}
+{
+    "filename": "06-潛潛人生.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "4⼈",
+        "number_of_people_traveling": "2⼈",
+        "group_seat": "4⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "09⽉01⽇",
+        "travel_days": "4天3夜",
+        "departure_airport_place": "",
+        "tourist_destination": "台東縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 10110,
+    "total_cost": 0.02022
+}
+{
+    "filename": "07-觀巴精選.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "6⼈",
+        "number_of_people_traveling": "2⼈",
+        "group_seat": "6⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉08⽇",
+        "travel_days": "2天1夜",
+        "departure_airport_place": "",
+        "tourist_destination": "新⽵縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 10643,
+    "total_cost": 0.021286000000000003
+}
+{
+    "filename": "08-武界部落觀雲海２日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "8⼈",
+        "number_of_people_traveling": "6⼈",
+        "group_seat": "8⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉11⽇",
+        "travel_days": "2天1夜",
+        "departure_airport_place": "",
+        "tourist_destination": "南投縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 11074,
+    "total_cost": 0.022148
+}
+{
+    "filename": "09-【立山一口價】立山黑部兼六園合掌村高山溫泉美食五日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "28⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "32⼈",
+        "group_status": "",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "09⽉19⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "⼩松,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 20515,
+    "total_cost": 0.041030000000000004
+}
+{
+    "filename": "10-《嗨Japan久等了！》【海遊三都影城】.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "0人",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "21人",
+        "group_status": "候補",
+        "deposit": "14,000",
+        "total_price": "",
+        "departure_date": "08⽉07⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "大阪, 日本",
+        "last_updated": ""
+    },
+    "total_tokens": 24988,
+    "total_cost": 0.049976
+}
+{
+    "filename": "11-冬戀東北~百選溫泉、會津鐵道、藏王樹冰纜車、雪中採草莓5日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "24⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "25⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "12⽉04⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "岩⼿縣/宮城縣/秋⽥/⼭形/仙台,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 24078,
+    "total_cost": 0.048156
+}
+{
+    "filename": "12-【旅展一口價 大手牽小手】樂高樂園X環球影城雙樂園虎航五日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "",
+        "number_of_people_traveling": "",
+        "group_seat": "",
+        "group_status": "",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "07⽉31⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "名古屋,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 13630,
+    "total_cost": 0.027260000000000003
+}
+{
+    "filename": "13-東澳全覽九日-雪梨.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "0⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "22⼈",
+        "group_status": "額滿",
+        "deposit": "20,000",
+        "total_price": "",
+        "departure_date": "08⽉08⽇",
+        "travel_days": "9天6夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "布⾥斯班/墨爾本/雪梨,澳⼤利亞",
+        "last_updated": ""
+    },
+    "total_tokens": 27380,
+    "total_cost": 0.054759999999999996
+}
+{
+    "filename": "14-趣遊花蓮２日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "34⼈",
+        "number_of_people_traveling": "36⼈",
+        "group_seat": "35人",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉24⽇",
+        "travel_days": "2天1夜",
+        "departure_airport_place": "",
+        "tourist_destination": "花蓮縣/宜蘭縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 11656,
+    "total_cost": 0.023312000000000003
+}
+{
+    "filename": "15-遇見海龜.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "6⼈",
+        "number_of_people_traveling": "2⼈",
+        "group_seat": "6⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉14⽇",
+        "travel_days": "2天1夜",
+        "departure_airport_place": "",
+        "tourist_destination": "屏東縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 10713,
+    "total_cost": 0.021426
+}
+{
+    "filename": "16-《心心向榮》【小資三都影城】京都.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "0人",
+        "number_of_people_traveling": "16人",
+        "group_seat": "32人",
+        "group_status": "額滿",
+        "deposit": "14,000元",
+        "total_price": "",
+        "departure_date": "08月01日",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "大阪, 日本",
+        "last_updated": ""
+    },
+    "total_tokens": 25667,
+    "total_cost": 0.051334000000000005
+}
+{
+    "filename": "17-大邱炸雞啤酒節５日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "13",
+        "number_of_people_traveling": "16",
+        "group_seat": "16",
+        "group_status": "現正",
+        "deposit": "5,000",
+        "total_price": "",
+        "departure_date": "09⽉02⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "釜⼭,南韓(⼤韓⺠國)",
+        "last_updated": ""
+    },
+    "total_tokens": 28222,
+    "total_cost": 0.056444
+}
+{
+    "filename": "18-《新品上市推薦》FUN假趣採果東京五星５日-藤子不二雄.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "27⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "32⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉29⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "東京,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 24565,
+    "total_cost": 0.04913
+}
+{
+    "filename": "19-夏日楓情~小東北.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "",
+        "number_of_people_traveling": "",
+        "group_seat": "18人",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "⾼雄-⼩港機場",
+        "tourist_destination": "千葉/東京(成田)/東京,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 25826,
+    "total_cost": 0.051652
+}
+{
+    "filename": "20-戀戀山陰山陽~出雲大社、足立美術館、嚴島神社６日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "11⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "28⼈",
+        "group_status": "現正熱賣",
+        "deposit": "12,000",
+        "total_price": "",
+        "departure_date": "09⽉07⽇",
+        "travel_days": "6天5夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "島根縣/廣島/⿃取/岡⼭,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 25317,
+    "total_cost": 0.050634
+}
+{
+    "filename": "21-森呼吸尋神木.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "20⼈",
+        "number_of_people_traveling": "20⼈",
+        "group_seat": "21人",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉05⽇",
+        "travel_days": "2天1夜",
+        "departure_airport_place": "",
+        "tourist_destination": "桃園市,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 11533,
+    "total_cost": 0.023066
+}
+{
+    "filename": "22-北海道花遊記５日-花田遊.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "27⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "28⼈",
+        "group_status": "現正熱賣",
+        "deposit": "20,000",
+        "total_price": "",
+        "departure_date": "08⽉30⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "北海道,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 30676,
+    "total_cost": 0.061352000000000004
+}
+{
+    "filename": "23-《嗨Japan久等了！》【關西京阪神影城5日】國泰午晚.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "1人",
+        "number_of_people_traveling": "16人",
+        "group_seat": "32人",
+        "group_status": "現正熱賣",
+        "deposit": "14,000元",
+        "total_price": "",
+        "departure_date": "08⽉17⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "⼤阪,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 25946,
+    "total_cost": 0.051892
+}
+{
+    "filename": "24-《嗨Japan久等了！》《精彩三都影城溫泉5日》和服體驗.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "10⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "28⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "09⽉01⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "⼤阪,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 25748,
+    "total_cost": 0.051496
+}
+{
+    "filename": "25-新一品南北島10日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "20⼈",
+        "number_of_people_traveling": "15⼈",
+        "group_seat": "21⼈",
+        "group_status": "現正熱賣",
+        "deposit": "30,000",
+        "total_price": "",
+        "departure_date": "09⽉27⽇",
+        "travel_days": "10天8夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "奧克蘭/基督城/羅吐魯阿/陶波湖,紐⻄蘭",
+        "last_updated": ""
+    },
+    "total_tokens": 32064,
+    "total_cost": 0.064128
+}
+{
+    "filename": "26-與飛魚邂逅的故事3日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "6⼈",
+        "number_of_people_traveling": "2⼈",
+        "group_seat": "",
+        "group_status": "",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉13⽇",
+        "travel_days": "3天2夜",
+        "departure_airport_place": "",
+        "tourist_destination": "蘭嶼,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 8662,
+    "total_cost": 0.017324000000000003
+}
+{
+    "filename": "27-東北仙境傳說～奧入瀨溪、猊鼻溪遊船、千秋公園、秋田雙鐵道６日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "7⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "36⼈",
+        "group_status": "現正熱賣",
+        "deposit": "12,000",
+        "total_price": "",
+        "departure_date": "09⽉05⽇",
+        "travel_days": "6天5夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "岩⼿縣/宮城縣/秋⽥/青森/秋⽥/⼭形,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 28873,
+    "total_cost": 0.057746000000000006
+}
+{
+    "filename": "28-仲夏玩釜山５日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "15",
+        "number_of_people_traveling": "16",
+        "group_seat": "20",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉21⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "釜⼭,南韓",
+        "last_updated": ""
+    },
+    "total_tokens": 23494,
+    "total_cost": 0.046988
+}
+{
+    "filename": "29-【經典立山】秋楓立山X峽谷鐵道溫泉美饌五日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "",
+        "number_of_people_traveling": "",
+        "group_seat": "",
+        "group_status": "",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "09⽉22⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "⼩松,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 13241,
+    "total_cost": 0.026482
+}
+{
+    "filename": "30-來去阿里山住一晚.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "6⼈",
+        "number_of_people_traveling": "6⼈",
+        "group_seat": "7⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉18⽇",
+        "travel_days": "3天2夜",
+        "departure_airport_place": "",
+        "tourist_destination": "嘉義縣,台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 12913,
+    "total_cost": 0.025826
+}
+{
+    "filename": "31-流金歲月大小金3日南石滬公園.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "20人",
+        "number_of_people_traveling": "16人",
+        "group_seat": "20人",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉09⽇",
+        "travel_days": "3天2夜",
+        "departure_airport_place": "台中清泉崗機場",
+        "tourist_destination": "金門縣, 台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 16507,
+    "total_cost": 0.033014
+}
+{
+    "filename": "32-楓迷四國~金刀比羅宮、大步危遊船、松山城纜車、釣魚餐廳5日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "18⼈",
+        "number_of_people_traveling": "16⼈",
+        "group_seat": "28⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "11⽉13⽇",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "松⼭/⾼松/德島/⾼知,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 26762,
+    "total_cost": 0.053524
+}
+{
+    "filename": "33-山陽四國雙城遊~嚴島神社、倉敷美觀、天空之鏡６日(廣島進出).pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "18人",
+        "number_of_people_traveling": "16人",
+        "group_seat": "28人",
+        "group_status": "現正熱賣",
+        "deposit": "12,000元",
+        "total_price": "",
+        "departure_date": "09⽉07⽇",
+        "travel_days": "6天5夜",
+        "departure_airport_place": "台北-桃園機場",
+        "tourist_destination": "島根縣/廣島/⿃取/岡⼭,⽇本",
+        "last_updated": ""
+    },
+    "total_tokens": 27200,
+    "total_cost": 0.0544
+}
+{
+    "filename": "34-綠意浪漫~沁涼消暑輕井澤5日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "",
+        "number_of_people_traveling": "",
+        "group_seat": "26人",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "",
+        "travel_days": "5天4夜",
+        "departure_airport_place": "高雄-小港機場",
+        "tourist_destination": "千葉/箱根/東京(成田)/東京,日本",
+        "last_updated": ""
+    },
+    "total_tokens": 23604,
+    "total_cost": 0.047208
+}
+{
+    "filename": "35-戀戀澎湖海水藍３日.pdf",
+    "result": {
+        "group_name": "",
+        "group_number": "",
+        "number_of_people_for_sale": "13⼈",
+        "number_of_people_traveling": "6⼈",
+        "group_seat": "20⼈",
+        "group_status": "現正熱賣",
+        "deposit": "",
+        "total_price": "",
+        "departure_date": "08⽉26⽇",
+        "travel_days": "3天2夜",
+        "departure_airport_place": "台中清泉崗機場",
+        "tourist_destination": "台灣",
+        "last_updated": ""
+    },
+    "total_tokens": 15757,
+    "total_cost": 0.031514
+}

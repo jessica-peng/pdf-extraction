@@ -38,13 +38,26 @@ export class FilesService {
     return this.http.post<FileInfoStru>(this.baseApiUrl + 'updateStructureById', params);
   }
 
-  fileExtraction(schemaId:string, fileId:string, structure: any, content: string, mapping: any): Observable<FileInfoStru> {
+  fileExtraction(schemaId:string, fileId:string, structure: any, content: string, mapping: any, mainAttrList:any, filetype: string): Observable<FileInfoStru> {
     const params = new HttpParams()
       .set('schemaId', schemaId)
       .set('fileId', fileId)
       .set('dtd', JSON.stringify(structure).toString())
       .set('mapping', JSON.stringify(mapping).toString())
+      .set('attrList', JSON.stringify(mainAttrList).toString())
+      .set('filetype', filetype)
       .set('content', content);
     return this.http.post<FileInfoStru>(this.baseApiUrl + 'fileExtraction', params);
+  }
+
+  fileExtractionByLangChain(schemaId:string, fileId:string, structure: any, content: string, mainAttrList:any, method: string): Observable<FileInfoStru> {
+    const params = new HttpParams()
+      .set('schemaId', schemaId)
+      .set('fileId', fileId)
+      .set('dtd', JSON.stringify(structure).toString())
+      .set('attrList', JSON.stringify(mainAttrList).toString())
+      .set('content', content)
+      .set('method', method);
+    return this.http.post<FileInfoStru>(this.baseApiUrl + 'fileExtractionByLangChain', params);
   }
 }

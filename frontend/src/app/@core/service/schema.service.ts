@@ -97,13 +97,22 @@ export class SchemaService {
     return this.http.post<SchemaStru>(this.baseApiUrl + 'updateFileListOfSchema', params);
   }
 
-  learningRule(schemaId:string, fileId:string, structure: any, content: string, mapping: any): Observable<SchemaStru> {
+  learningRule(schemaId:string, fileId:string, structure: any, content: string, mapping: any, filetype: string): Observable<SchemaStru> {
     const params = new HttpParams()
       .set('schemaId', schemaId)
       .set('fileId', fileId)
       .set('dtd', JSON.stringify(structure).toString())
       .set('mapping', JSON.stringify(mapping).toString())
+      .set('filetype', filetype)
       .set('content', content);
     return this.http.post<SchemaStru>(this.baseApiUrl + 'learningRule', params);
+  }
+
+  updatePatternsByLangchain(schemaId:string, structure: any, content: string): Observable<SchemaStru> {
+    const params = new HttpParams()
+      .set('schemaId', schemaId)
+      .set('dtd', JSON.stringify(structure).toString())
+      .set('content', content);
+    return this.http.post<SchemaStru>(this.baseApiUrl + 'updatePatternsByLangchain', params);
   }
 }

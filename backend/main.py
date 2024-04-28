@@ -2,24 +2,25 @@ import json
 import os
 import uuid
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from backend.database.collection import Schema, Files
 from backend.database.entity import Entity
 from backend.module.fst import FST
+from backend.module.langchain_pdf_json import LCOP
 from backend.module.prefixSpan import PrefixSpan
 from backend.module.read_file import Read_File
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+# app.config['CORS_HEADERS'] = 'Content-Type'
 
 entity = Entity()
 
 # @app.route('/')
 # def root():
 #     return render_template('index.html')
-
 
 @app.route("/")
 def hello():
@@ -79,7 +80,7 @@ def update_schema():
     ignoreTokes = request.form.get('ignoreTokens')
     minSupport = request.form.get('minSupport')
 
-    schemaInfo = entity.updateSchema(schemaId, json.loads(ignoreTokes), minSupport, "", "", "", "", "", "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, json.loads(ignoreTokes), minSupport, "", "", "", "", "", "", "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -89,10 +90,9 @@ def is_allow_extensions(filename):
     return ('.' in filename) and (filename.split('.')[-1].lower() == 'pdf')
 
 
-@app.route('/uploadFiles', methods=['POST'])
-def upload_files():
-    folder = request.headers.get('upload_type')
-    path = request.headers.get('files_path') + folder
+@app.route('/uploadFiles/<schemaId>/<folder>', methods=['POST'])
+def upload_files(schemaId, folder):
+    path = 'data/demo/' + schemaId + '/' + folder
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -139,7 +139,7 @@ def update_pattern_of_schema():
     schemaId = request.form.get('schemaId')
     patternList = request.form.get('patternList')
     patternList = patternList.split(',')
-    schemaInfo = entity.updateSchema(schemaId, "", "", patternList, "", "", "", "", "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, "", "", patternList, "", "", "", "", "", "", "", "")
     print(schemaInfo)
 
     return jsonify(schemaInfo)
@@ -189,7 +189,7 @@ def get_dtd():
 def update_attribute_of_schema():
     schemaId = request.form.get('schemaId')
     attribute = request.form.get('attribute')
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", attribute, "", "", "", "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", attribute, "", "", "", "", "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -213,7 +213,9 @@ def update_dtd_of_schema():
                 mapping.update({key1 + "." + key2: key1 + "_" + K2})
         else:
             mapping.update({key1: key1})
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", dtd, "", mapping, "", "", "")
+
+    # entity.updateNewStructureToFile(schemaId)
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", dtd, "", mapping, "", "", "", "")
     print(schemaInfo)
     return jsonify(schemaInfo)
 
@@ -228,7 +230,7 @@ def update_fileList_of_schema():
         "name": filename
     }
 
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", fileInfo, "", "", "", "")
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", fileInfo, "", "", "", "", "")
     path = schemaInfo['files_path'] + 'test'
     read_file = Read_File(path)
     read_file.read_pdf_file_text(filename)
@@ -240,7 +242,8 @@ def update_fileList_of_schema():
 def read_text_file_of_PDF():
     path = request.args['files_path']
     filename = request.args['filename']
-    read_file = Read_File(path)
+    filetype = request.args['filetype']
+    read_file = Read_File(path, filetype)
     result = read_file.read_text_file(filename)
     return jsonify(result)
 
@@ -271,7 +274,7 @@ def add_file_info():
 
     files['schema_id'] = schemaId
     files['file_id'] = fileId
-    files['structure'] = structure
+    files['instance'] = structure
     files['position'] = structure
     filesInfo = entity.insertFiles(files)
     print(filesInfo)
@@ -283,6 +286,7 @@ def get_file_info():
     schema_id = request.args['schema_id']
     file_id = request.args['file_id']
     result = entity.getFileInfoBySchemaIdAndFileId(schema_id, file_id)
+    print("file ID = " + file_id)
     return jsonify(result)
 
 
@@ -295,6 +299,7 @@ def update_structure_by_id():
     structure = json.loads(dtd)
     positionColor = json.loads(pc)
     result = entity.updateStructureById(schemaId, fileId, structure, positionColor)
+    print("file ID = " + fileId)
     return jsonify(result)
 
 
@@ -307,9 +312,18 @@ def learning_rule():
     content = request.form.get('content')
     structure = json.loads(dtd)
     mapping = json.loads(mapping)
-    fst = FST(schemaId, fileId, structure, content, mapping)
-    mealyFst, mooreFst, rules = fst.learning()
-    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
+    filetype = request.form.get('filetype')
+    if filetype == '表單':
+        filetype = 'form'
+    elif filetype == '表格':
+        filetype = 'table'
+    elif filetype == '財務報表':
+        filetype = 'FS'
+    else:
+        filetype = ''
+    fst = FST(schemaId, fileId, structure, content, mapping, filetype)
+    mealyFst, mooreFst, softmealyFst, rules = fst.learning()
+    schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, softmealyFst, rules)
     return jsonify(schemaInfo)
 
 
@@ -319,14 +333,61 @@ def file_extraction():
     fileId = request.form.get('fileId')
     dtd = request.form.get('dtd')
     mapping = request.form.get('mapping')
+    attrList = request.form.get('attrList')
     content = request.form.get('content')
     structure = json.loads(dtd)
     mapping = json.loads(mapping)
-    fst = FST(schemaId, fileId, structure, content, mapping)
-    mealyFst, mooreFst, rules = fst.extraction()
-    result = entity.updateSchema(schemaId, "", "", "", "", "", "", "", mealyFst, mooreFst, rules)
+    attrList = json.loads(attrList)
+    filetype = request.form.get('filetype')
+    if filetype == '表單':
+        filetype = 'form'
+    elif filetype == '表格':
+        filetype = 'table'
+    elif filetype == '財務報表':
+        filetype = 'FS'
+    else:
+        filetype = ''
+    fst = FST(schemaId, fileId, structure, content, mapping, filetype)
+    file_structure, file_position = fst.extraction(attrList)
+    result = entity.updateStructureById(schemaId, fileId, file_structure, file_position)
+    print("file ID = " + fileId)
+    return jsonify(result)
+
+
+@app.route('/fileExtractionByLangChain', methods=['POST'])
+def file_extraction_by_langchain():
+    schemaId = request.form.get('schemaId')
+    fileId = request.form.get('fileId')
+    dtd = request.form.get('dtd')
+    attrList = request.form.get('attrList')
+    content = request.form.get('content')
+    method = request.form.get('method')
+    structure = json.loads(dtd)
+    attrList = json.loads(attrList)
+    file_structure = {}
+    file_position = {}
+    if method == 'LCOP':
+        lcop = LCOP(schemaId, structure, content)
+        file_structure, file_position = lcop.extraction(attrList)
+    result = entity.updateStructureById(schemaId, fileId, file_structure, file_position)
+    print("file ID = " + fileId)
+    return jsonify(result)
+
+
+@app.route('/updatePatternsByLangchain', methods=['POST'])
+def update_patterns_by_langchain():
+    schemaId = request.form.get('schemaId')
+    dtd = request.form.get('dtd')
+    content = request.form.get('content')
+    structure = json.loads(dtd)
+    lcop = LCOP(schemaId, structure, content)
+    result = lcop.get_new_dtd()
     return jsonify(result)
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
+    CORS(app)
+    # from gevent import pywsgi
+    # server = pywsgi.WSGIServer(('0.0.0.0', 5002), app)
+    # server.serve_forever()
