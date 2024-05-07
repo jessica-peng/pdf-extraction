@@ -5,9 +5,12 @@ import re
 
 from SciPyFST import fst
 from bs4 import BeautifulSoup
+from .softmealy import SoftMealy
+import sys
 
-from backend.database.entity import Entity
-from backend.module.softmealy import SoftMealy
+sys.path.append("..")
+# from module.database.entity import Entity
+from database.entity import Entity
 
 entity = Entity()
 
@@ -421,7 +424,7 @@ class FST:
                                 break
                             # else:
                             #     if line.find(complete_value) == 0:
-                                    # target = key
+                            # target = key
                 # if target != "":
                 #     break
             else:
@@ -455,7 +458,7 @@ class FST:
                             break
                         # else:
                         #     if line.find(complete_value) == 0:
-                                # target = key
+                        # target = key
 
         return target, isAddLine
 
@@ -767,12 +770,14 @@ class FST:
                     left_LM = " "
                     if (in_sp == preLine) and (preLine != ''):
                         left_LM = left_LM + "||" + in_sp + "||" + "\n"
-                    elif (pre_value not in preLine) and (preLine not in pre_value) and (not self.has_punctuation(preLine)):
+                    elif (pre_value not in preLine) and (preLine not in pre_value) and (
+                    not self.has_punctuation(preLine)):
                         left_LM = left_LM + "||" + preLine + "||" + "\n"
 
                     if (out_sp != '') and (out_sp in nextLine):
                         right_LM = out_sp
-                    elif (next_value not in nextLine) and (nextLine not in next_value) and (not self.has_punctuation(nextLine)):
+                    elif (next_value not in nextLine) and (nextLine not in next_value) and (
+                    not self.has_punctuation(nextLine)):
                         right_LM = nextLine
                     else:
                         right_LM = "\n"
@@ -813,7 +818,8 @@ class FST:
                     if ((in_sp == preLine) or (preLine in in_sp)) and (preLine != ''):
                         left_LM = left_LM + "||" + in_sp + "||" + "\n"
                     elif (preLine != '') and (preLine not in self.schemaInfo['pattern_list']) and \
-                            (not self.is_number(preLine)) and (not self.hasNumber(preLine)) and ((not self.has_punctuation(preLine)) or ('-' in preLine)):
+                            (not self.is_number(preLine)) and (not self.hasNumber(preLine)) and (
+                            (not self.has_punctuation(preLine)) or ('-' in preLine)):
                         self.schema_dtd = self.getNewSchemaDtd()
                         self.schemaInfo = self.updateSchemaDtd(current_signal, preLine)
                         new_dtd = self.getNewSchemaDtd()
@@ -830,12 +836,14 @@ class FST:
                         self.schema_dtd = self.getNewSchemaDtd()
                         left_LM = left_LM + "||" + in_sp + "||" + "\n"
                         print(self.rules)
-                    elif ((pre_value == '') or (pre_value not in preLine)) and (preLine not in pre_value) and (not self.is_number(preLine)) and (not self.hasNumber(preLine)):
+                    elif ((pre_value == '') or (pre_value not in preLine)) and (preLine not in pre_value) and (
+                    not self.is_number(preLine)) and (not self.hasNumber(preLine)):
                         left_LM = left_LM + "||" + preLine + "||" + "\n"
 
                     if (out_sp != '') and (out_sp in nextLine):
                         right_LM = out_sp
-                    elif (next_value not in nextLine) and (nextLine not in next_value) and (not self.is_number(nextLine)) and (not self.hasNumber(nextLine)):
+                    elif (next_value not in nextLine) and (nextLine not in next_value) and (
+                    not self.is_number(nextLine)) and (not self.hasNumber(nextLine)):
                         right_LM = nextLine
                     else:
                         right_LM = "\n"
@@ -889,7 +897,8 @@ class FST:
                     if right_LM == '':
                         if (out_sp != '') and (out_sp in nextLine):
                             right_LM = out_sp
-                        elif (next_value not in nextLine) and (nextLine not in next_value) and (not self.is_number(nextLine)) and (not self.hasNumber(nextLine)):
+                        elif (next_value not in nextLine) and (nextLine not in next_value) and (
+                        not self.is_number(nextLine)) and (not self.hasNumber(nextLine)):
                             right_LM = nextLine
                         elif (next_value == '') and (nextLine != ''):
                             right_LM = nextLine
@@ -919,7 +928,8 @@ class FST:
                                 print(self.rules)
                         else:
                             preLine = preLine.replace(':', '').replace('：', '')
-                            if (preLine not in in_sp.split('/')) and (preLine not in current_value) and (not self.has_punctuation(preLine)):
+                            if (preLine not in in_sp.split('/')) and (preLine not in current_value) and (
+                            not self.has_punctuation(preLine)):
                                 self.schema_dtd = self.getNewSchemaDtd()
                                 self.schemaInfo = self.updateSchemaDtd(current_signal, preLine)
                                 new_dtd = self.getNewSchemaDtd()
@@ -959,7 +969,8 @@ class FST:
                                 print(self.rules)
                         else:
                             preLine = preLine.replace(':', '').replace('：', '')
-                            if (preLine != in_sp) and (preLine not in current_value) and (not self.has_punctuation(preLine)):
+                            if (preLine != in_sp) and (preLine not in current_value) and (
+                            not self.has_punctuation(preLine)):
                                 self.schema_dtd = self.getNewSchemaDtd()
                                 self.schemaInfo = self.updateSchemaDtd(current_signal, preLine)
                                 new_dtd = self.getNewSchemaDtd()
@@ -978,7 +989,8 @@ class FST:
 
                         if (preLine in in_sp.split('/')) or (preLine == in_sp):
                             left_LM = left_LM + "||" + in_sp + "||" + "\n"
-                    elif (pre_value not in preLine) and (preLine not in pre_value) and (not self.has_punctuation(preLine)):
+                    elif (pre_value not in preLine) and (preLine not in pre_value) and (
+                    not self.has_punctuation(preLine)):
                         left_LM = left_LM + "||" + preLine + "||" + "\n"
 
                     if '/' in out_sp:
@@ -1143,7 +1155,8 @@ class FST:
                                     left_LM = left_LM + "||" + in_sp + "||" + "\n"
                             elif in_sp == preLine:
                                 left_LM = left_LM + "||" + in_sp + "||" + "\n"
-                            elif (pre_value not in preLine) and (preLine not in pre_value) and (not self.has_punctuation(preLine)):
+                            elif (pre_value not in preLine) and (preLine not in pre_value) and (
+                            not self.has_punctuation(preLine)):
                                 left_LM = left_LM + "||" + preLine + "||" + "\n"
 
                             if '/' in out_sp:
@@ -1660,8 +1673,12 @@ class FST:
     def goTransition(self, current_line, next_line, input_symbol):
         ok = False
         right_LM = self.prepare_LM(input_symbol.get('right_LM'))
-        current_line = current_line.get('line_content').replace('\u3000', '').replace('\u0020', '').replace('\u00A0', '').replace('\xa0', '').replace('\x00', '') + '\n'
-        next_line = next_line.get('line_content').replace('\u3000', '').replace('\u0020', '').replace('\u00A0', '').replace('\xa0', '').replace('\x00', '') + '\n'
+        current_line = current_line.get('line_content').replace('\u3000', '').replace('\u0020', '').replace('\u00A0',
+                                                                                                            '').replace(
+            '\xa0', '').replace('\x00', '') + '\n'
+        next_line = next_line.get('line_content').replace('\u3000', '').replace('\u0020', '').replace('\u00A0',
+                                                                                                      '').replace(
+            '\xa0', '').replace('\x00', '') + '\n'
         for lm in right_LM:
             ratio = difflib.SequenceMatcher(None, current_line, lm).ratio()
             is_punctuation = re.search(r'(\uFF1A|\uFF1B|\uFF1F)', current_line[-2])
@@ -1670,7 +1687,7 @@ class FST:
                 break
             if (lm in current_line) and (not is_punctuation):
                 idx = current_line.find(lm)
-                if (idx == 0) or (lm == '\n'): #or (idx + len(lm) == len(current_line)):
+                if (idx == 0) or (lm == '\n'):  # or (idx + len(lm) == len(current_line)):
                     ok = True
                     break
             ratio = difflib.SequenceMatcher(None, next_line, lm).ratio()
@@ -1680,7 +1697,7 @@ class FST:
                 break
             if (lm in next_line) and (not is_punctuation):
                 idx = next_line.find(lm)
-                if (idx == 0) or (lm == '\n'): # or (lm + '\n' == next_line[-len(lm + '\n'):]):
+                if (idx == 0) or (lm == '\n'):  # or (lm + '\n' == next_line[-len(lm + '\n'):]):
                     ok = True
                     break
         if (self.filetype == 'form') and (next_line == input_symbol.get('right_LM')):
@@ -1892,7 +1909,8 @@ class FST:
                                 position["start"] = span[startIdx].attrs['data-value']
                             position["end"] = int(span[len(span) - 1].attrs['data-value']) + 1
 
-                            if (len(self.prepare_LM(input_signal.get('left_LM'))) > 1) and (' ' in self.prepare_LM(input_signal.get('left_LM'))):
+                            if (len(self.prepare_LM(input_signal.get('left_LM'))) > 1) and (
+                                    ' ' in self.prepare_LM(input_signal.get('left_LM'))):
                                 if (pattern != '') and (pattern in self.prepare_LM(input_signal.get('left_LM'))):
                                     keyword = pattern
                         else:
@@ -1900,7 +1918,8 @@ class FST:
                                 keyword = current_line_content
                                 idx = idx + 1
                                 continue
-                            elif (self.filetype == 'form') and (current_line_content in input_signal.get('left_LM').split('||')):
+                            elif (self.filetype == 'form') and (
+                                    current_line_content in input_signal.get('left_LM').split('||')):
                                 keyword = current_line_content
                                 idx = idx + 1
                                 continue
@@ -1980,7 +1999,9 @@ class FST:
                                 right_LM = r.replace('(', '').replace(')', '')
                                 nolist = nolist + right_LM.split('|')
                             if len(next_line.get('line_content')) >= 2:
-                                if (next_line.get('line_content')[0] in nolist) and ((next_line.get('line_content')[1] == '、') or (next_line.get('line_content')[1] == '.')):
+                                if (next_line.get('line_content')[0] in nolist) and (
+                                        (next_line.get('line_content')[1] == '、') or (
+                                        next_line.get('line_content')[1] == '.')):
                                     noExtract = False
                                     if '.' in current_state:
                                         key1 = current_state.split('.')[0]

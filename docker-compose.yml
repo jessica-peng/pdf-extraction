@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  nginx:
+      image: nginx
+      container_name: 'nginx'
+      depends_on:
+        - frontend
+        - backend
+      links:
+        - backend
+      volumes:
+        - shared:/usr/share/nginx/html
+        - ./nginx.conf:/etc/nginx/nginx.conf
+      ports:
+        - "80:80"
+  frontend:
+    build:
+      context: ./frontend
+    container_name: "frontend"
+    volumes:
+      - shared:/app/dist
+  backend:
+    build:
+      context: ./backend
+    container_name: "backend"
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      MONGO_HOST: db
+      MONGO_PORT: 27017
+      MONGO_USERNAME: widmpdf
+      MONGO_PASSWORD: widm
+      MONGO_AUTH_SOURCE: widmpdf
+  db:
+    image: mongo:4.4.3
+    container_name: "mongodb"
+    restart: unless-stopped
+    volumes:
+      - ./backend/database/db:/data/db
+      - ./docker-entrypoint.sh:/docker-entrypoint-initdb.d/entrypoint.sh
+      - ./backend/mongod.conf:/etc/mongod.conf
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: widmpdf
+      MONGO_INITDB_ROOT_PASSWORD: widm
+    ports:
+      - "28017:27017"
+#    command: mongod --auth
+volumes:
+  shared: {}

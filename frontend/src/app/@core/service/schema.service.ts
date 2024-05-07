@@ -3,7 +3,6 @@ import {GlobalVariable} from "../global";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {SchemaStru} from "../model/schema.model";
-import {FileInfoStru} from "../model/files.model";
 
 @Injectable()
 export class SchemaService {
@@ -90,9 +89,10 @@ export class SchemaService {
     return this.http.post<SchemaStru>(this.baseApiUrl + 'updateDtdOfSchema', params);
   }
 
-  updateFileListOfSchema(schemaId:string, filename: string): Observable<SchemaStru>  {
+  updateFileListOfSchema(schemaId:string, filename: string, filetype: string): Observable<SchemaStru>  {
     const params = new HttpParams()
       .set('schemaId', schemaId)
+      .set('filetype', filetype)
       .set('filename', filename);
     return this.http.post<SchemaStru>(this.baseApiUrl + 'updateFileListOfSchema', params);
   }

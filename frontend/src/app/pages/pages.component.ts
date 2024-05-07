@@ -192,7 +192,7 @@ export class PagesComponent implements OnInit{
             console.log(data);
           });
         } else if (type === "test") {
-          this.schemaService.updateFileListOfSchema(this.schemaId, this.uploadFiles[0].name)
+          this.schemaService.updateFileListOfSchema(this.schemaId, this.uploadFiles[0].name, this.selectFileTypeForMarked)
             .subscribe( data => {
               this.fileList = data.file_list;
               let fileId = this.fileList.find(file => file.name === this.uploadFiles[0].name).id;

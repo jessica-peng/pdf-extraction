@@ -1,19 +1,18 @@
 import copy
 import difflib
 import json
-import os
-import re
 import numpy as np
 
 from bs4 import BeautifulSoup
-from fitz import fitz
 from langchain.callbacks import get_openai_callback
 from langchain.output_parsers.structured import StructuredOutputParser, ResponseSchema
 from langchain.prompts import PromptTemplate
 from langchain.llms import OpenAI
-from langchain.text_splitter import CharacterTextSplitter
 
-from backend.database.entity import Entity
+import sys
+
+sys.path.append("..")
+from database.entity import Entity
 
 entity = Entity()
 

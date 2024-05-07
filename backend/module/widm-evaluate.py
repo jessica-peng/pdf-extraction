@@ -1,7 +1,4 @@
-import evaluate
-from evaluate import load
-from sklearn.metrics import precision_score, recall_score, f1_score, classification_report, \
-    precision_recall_fscore_support
+from sklearn.metrics import f1_score, classification_report
 
 from backend.database.entity import Entity
 
@@ -146,13 +143,21 @@ class WIDM_EVALUATE:
 
 
 if __name__ == '__main__':
+    # mongodb config
+    DB_HOST_MONGO = 'mongodb://db:28017/'
+    DB_NAME_MONGO = "widmpdf"
+    DB_USERNAME = 'widmpdf'
+    DB_PASSWORD = 'widm'
+
+    entity = Entity(DB_HOST_MONGO, DB_NAME_MONGO, DB_USERNAME, DB_PASSWORD)
+
     schema_id = '9c0f7fc5ee544156ba895006e1197e6c'  # 填寫要正確的schema id
     groundTruths_id = '5c48fa41c267499aac064f81f4fe8d25'  # 填寫正確的檔案結構的 file id
-    groundTruths = Entity().getFileInfoBySchemaIdAndFileId(schema_id, groundTruths_id)
+    groundTruths = entity.getFileInfoBySchemaIdAndFileId(schema_id, groundTruths_id)
 
     schema_id = '9c0f7fc5ee544156ba895006e1197e6d'  # 填寫要擷取的schema id
     prediction_id = 'ed674ed204f2417f99cc02d426b9f221'  # 填寫程式擷取的檔案結構的 file id
-    prediction = Entity().getFileInfoBySchemaIdAndFileId(schema_id, prediction_id)
+    prediction = entity.getFileInfoBySchemaIdAndFileId(schema_id, prediction_id)
 
     groundTruths = groundTruths.get('instance')
     prediction = prediction.get('instance')

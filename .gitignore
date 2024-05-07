@@ -3,4 +3,5 @@
 .idea/
 /backend/static/
 /backend/templates/
-/backend/data/
+/backend/V1/
+/backend/V2/

@@ -5,12 +5,12 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from backend.database.collection import Schema, Files
-from backend.database.entity import Entity
-from backend.module.fst import FST
-from backend.module.langchain_pdf_json import LCOP
-from backend.module.prefixSpan import PrefixSpan
-from backend.module.read_file import Read_File
+from database.collection import Schema, Files
+from database.entity import Entity
+from module.fst import FST
+from module.langchain_pdf_json import LCOP
+from module.prefixSpan import PrefixSpan
+from module.read_file import Read_File
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -22,12 +22,14 @@ entity = Entity()
 # def root():
 #     return render_template('index.html')
 
-@app.route("/")
+
+@app.route("/api", methods=['GET'])
 def hello():
-    return jsonify({'text': 'Hello World!'})
+    # return jsonify({'text': 'Hello World!'})
+    return entity.getDatabase()
 
 
-@app.route('/schemaList', methods=['GET'])
+@app.route('/api/schemaList', methods=['GET'])
 def get_schemaList():
     # fetching from the database
     userId = request.args['userId']
@@ -40,7 +42,7 @@ def get_schemaList():
     return jsonify(schemaList)
 
 
-@app.route('/schema', methods=['GET'])
+@app.route('/api/schema', methods=['GET'])
 def get_schema():
     schemaId = request.args['schemaId']
 
@@ -53,7 +55,7 @@ def get_schema():
     return jsonify(result)
 
 
-@app.route('/addSchema', methods=['POST'])
+@app.route('/api/addSchema', methods=['POST'])
 def add_schema():
     schema = Schema().getCollectionFormat()
     userId = request.form.get('userId')
@@ -74,7 +76,7 @@ def add_schema():
     return jsonify(schemaInfo)
 
 
-@app.route('/updateSchema', methods=['POST'])
+@app.route('/api/updateSchema', methods=['POST'])
 def update_schema():
     schemaId = request.form.get('schemaId')
     ignoreTokes = request.form.get('ignoreTokens')
@@ -90,7 +92,7 @@ def is_allow_extensions(filename):
     return ('.' in filename) and (filename.split('.')[-1].lower() == 'pdf')
 
 
-@app.route('/uploadFiles/<schemaId>/<folder>', methods=['POST'])
+@app.route('/api/uploadFiles/<schemaId>/<folder>', methods=['POST'])
 def upload_files(schemaId, folder):
     path = 'data/demo/' + schemaId + '/' + folder
     if not os.path.exists(path):
@@ -104,7 +106,7 @@ def upload_files(schemaId, folder):
     return jsonify('success')
 
 
-@app.route('/schemaMining', methods=['POST'])
+@app.route('/api/schemaMining', methods=['POST'])
 def schema_mining():
     path = request.form.get('files_path') + 'pattern'
     schemaId = request.form.get('schemaId')
@@ -134,7 +136,7 @@ def schema_mining():
     return jsonify(result)
 
 
-@app.route('/updatePatternOfSchema', methods=['POST'])
+@app.route('/api/updatePatternOfSchema', methods=['POST'])
 def update_pattern_of_schema():
     schemaId = request.form.get('schemaId')
     patternList = request.form.get('patternList')
@@ -145,7 +147,7 @@ def update_pattern_of_schema():
     return jsonify(schemaInfo)
 
 
-@app.route('/patterns', methods=['GET'])
+@app.route('/api/patterns', methods=['GET'])
 def get_patterns():
     schemaId = request.args['schemaId']
 
@@ -161,7 +163,7 @@ def get_patterns():
     return jsonify(result)
 
 
-@app.route('/getAttributes', methods=['GET'])
+@app.route('/api/getAttributes', methods=['GET'])
 def get_attributes():
     schemaId = request.args['schemaId']
     # fetching from the database
@@ -176,7 +178,7 @@ def get_attributes():
     return jsonify(result)
 
 
-@app.route('/getDtd', methods=['GET'])
+@app.route('/api/getDtd', methods=['GET'])
 def get_dtd():
     schemaId = request.args['schemaId']
     # fetching from the database
@@ -185,7 +187,7 @@ def get_dtd():
     return jsonify(result)
 
 
-@app.route('/updateAttributeOfSchema', methods=['POST'])
+@app.route('/api/updateAttributeOfSchema', methods=['POST'])
 def update_attribute_of_schema():
     schemaId = request.form.get('schemaId')
     attribute = request.form.get('attribute')
@@ -194,7 +196,7 @@ def update_attribute_of_schema():
     return jsonify(schemaInfo)
 
 
-@app.route('/updateDtdOfSchema', methods=['POST'])
+@app.route('/api/updateDtdOfSchema', methods=['POST'])
 def update_dtd_of_schema():
     schemaId = request.form.get('schemaId')
     dtd = request.form.get('dtd')
@@ -220,7 +222,7 @@ def update_dtd_of_schema():
     return jsonify(schemaInfo)
 
 
-@app.route('/updateFileListOfSchema', methods=['POST'])
+@app.route('/api/updateFileListOfSchema', methods=['POST'])
 def update_fileList_of_schema():
     schemaId = request.form.get('schemaId')
     filename = request.form.get('filename')
@@ -232,13 +234,14 @@ def update_fileList_of_schema():
 
     schemaInfo = entity.updateSchema(schemaId, "", "", "", "", "", fileInfo, "", "", "", "", "")
     path = schemaInfo['files_path'] + 'test'
-    read_file = Read_File(path)
+    filetype = request.args['filetype']
+    read_file = Read_File(path, filetype)
     read_file.read_pdf_file_text(filename)
     print('success')
     return jsonify(schemaInfo)
 
 
-@app.route('/readTextFileOfPDF', methods=['GET'])
+@app.route('/api/readTextFileOfPDF', methods=['GET'])
 def read_text_file_of_PDF():
     path = request.args['files_path']
     filename = request.args['filename']
@@ -248,7 +251,7 @@ def read_text_file_of_PDF():
     return jsonify(result)
 
 
-@app.route('/addFileInfo', methods=['POST'])
+@app.route('/api/addFileInfo', methods=['POST'])
 def add_file_info():
     files = Files().getCollectionFormat()
     schemaId = request.form.get('schemaId')
@@ -281,7 +284,7 @@ def add_file_info():
     return jsonify(filesInfo)
 
 
-@app.route('/getFileInfo', methods=['GET'])
+@app.route('/api/getFileInfo', methods=['GET'])
 def get_file_info():
     schema_id = request.args['schema_id']
     file_id = request.args['file_id']
@@ -290,7 +293,7 @@ def get_file_info():
     return jsonify(result)
 
 
-@app.route('/updateStructureById', methods=['POST'])
+@app.route('/api/updateStructureById', methods=['POST'])
 def update_structure_by_id():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
@@ -303,7 +306,7 @@ def update_structure_by_id():
     return jsonify(result)
 
 
-@app.route('/learningRule', methods=['POST'])
+@app.route('/api/learningRule', methods=['POST'])
 def learning_rule():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
@@ -327,7 +330,7 @@ def learning_rule():
     return jsonify(schemaInfo)
 
 
-@app.route('/fileExtraction', methods=['POST'])
+@app.route('/api/fileExtraction', methods=['POST'])
 def file_extraction():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
@@ -354,7 +357,7 @@ def file_extraction():
     return jsonify(result)
 
 
-@app.route('/fileExtractionByLangChain', methods=['POST'])
+@app.route('/api/fileExtractionByLangChain', methods=['POST'])
 def file_extraction_by_langchain():
     schemaId = request.form.get('schemaId')
     fileId = request.form.get('fileId')
@@ -374,7 +377,7 @@ def file_extraction_by_langchain():
     return jsonify(result)
 
 
-@app.route('/updatePatternsByLangchain', methods=['POST'])
+@app.route('/api/updatePatternsByLangchain', methods=['POST'])
 def update_patterns_by_langchain():
     schemaId = request.form.get('schemaId')
     dtd = request.form.get('dtd')
