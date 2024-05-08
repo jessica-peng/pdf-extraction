@@ -25,8 +25,8 @@ entity = Entity()
 
 @app.route("/api", methods=['GET'])
 def hello():
-    # return jsonify({'text': 'Hello World!'})
-    return entity.getDatabase()
+    return jsonify({'text': 'Hello World!'})
+    # return entity.getDatabase()
 
 
 @app.route('/api/schemaList', methods=['GET'])
