@@ -44,12 +44,11 @@ services:
       - ./backend/database/db:/data/db
       - ./docker-entrypoint.sh:/docker-entrypoint-initdb.d/entrypoint.sh
       - ./backend/mongod.conf:/etc/mongod.conf
-
     environment:
       MONGO_INITDB_ROOT_USERNAME: widmpdf
       MONGO_INITDB_ROOT_PASSWORD: widm
     ports:
       - "28017:27017"
-#    command: mongod --auth
+    command: mongod --dbpath /data/db --repair --auth
 volumes:
   shared: {}
