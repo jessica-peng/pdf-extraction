@@ -114,8 +114,9 @@ def schema_mining():
     minSupport = request.form.get('minSupport')
     patternMin = request.form.get('patternMin')
     patternMax = request.form.get('patternMax')
+    filetype = request.form.get('filetype')
 
-    read_file = Read_File(path)
+    read_file = Read_File(path, filetype)
     mining = PrefixSpan(path, ignoreTokes, minSupport, patternMin, patternMax)
     read_file.read_pdf_file_dict()
     pattern_list = mining.executePrefixSpan()

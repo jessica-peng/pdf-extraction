@@ -42,14 +42,15 @@ export class CommonService {
     return this.http.post<string>(this.baseApiUrl + 'uploadFiles/' + schemaId + '/' + type, fd);
   }
 
-  schemaMining(filesPath: string, schemaId: string, minSupport: number, patternMin: number, patternMax: number, token: any[]): Observable<any> {
+  schemaMining(filesPath: string, schemaId: string, minSupport: number, patternMin: number, patternMax: number, token: any[], filetype: string): Observable<any> {
     const params = new HttpParams()
       .set('files_path', filesPath)
       .set('schemaId', schemaId)
       .set('minSupport', minSupport.toString())
       .set('patternMin', patternMin.toString())
       .set('patternMax', patternMax.toString())
-      .set('ignoreTokens',JSON.stringify(token).toString());
+      .set('ignoreTokens',JSON.stringify(token).toString())
+      .set('filetype', filetype);
     return this.http.post<any>(this.baseApiUrl + 'schemaMining', params);
   }
 

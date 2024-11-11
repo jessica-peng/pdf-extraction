@@ -44,6 +44,14 @@
                 </mat-autocomplete>
                 <mat-error *ngIf="schema.invalid"> You must enter a schema</mat-error>
               </mat-form-field>
+              <mat-form-field appearance="outline" style="width: 20%; margin: 0 20px;">
+                <mat-label>Choose file type</mat-label>
+                <mat-select [(ngModel)]="selectFileTypeForMarked" name="fileType" (selectionChange)="changeMethod(selectFileTypeForMarked)">
+                  <mat-option *ngFor="let fileType of fileTypeList" [value]="fileType">
+                    {{fileType}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
               <mat-card-actions style="display: none;">
                 <button mat-stroked-button color="accent"
                         [disabled]="true"

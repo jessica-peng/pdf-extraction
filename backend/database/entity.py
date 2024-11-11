@@ -5,7 +5,7 @@ from bson import ObjectId
 class Entity:
 
     def __init__(self):
-        self.client = pymongo.MongoClient('mongodb://widmpdf:widm@db:27017/?authSource=widmpdf')
+        self.client = pymongo.MongoClient('mongodb://widmpdf:widm@localhost:27017/?authSource=widmpdf')
         self.database = self.client["widmpdf"]
 
     def getDatabase(self):

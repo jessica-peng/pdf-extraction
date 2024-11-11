@@ -182,7 +182,7 @@ export class PagesComponent implements OnInit{
         console.log(result);
 
         if (type === "pattern") {
-          this.commonService.schemaMining(files_path, this.schemaId, this.min_support, this.pattern_min, this.pattern_max, tokens)
+          this.commonService.schemaMining(files_path, this.schemaId, this.min_support, this.pattern_min, this.pattern_max, tokens, this.selectFileTypeForMarked)
           .subscribe( data => {
             this.patternList = data.pattern;
             this.patternLen = this.patternList.length;
